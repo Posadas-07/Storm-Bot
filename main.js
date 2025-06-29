@@ -2076,7 +2076,7 @@ case 'play6': {
 
         const infoMessage = `
 ╔══════════════════╗
-║✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼 2.0 BOT  ✦   
+║✦ STORM 2.0 BOT  ✦   
 ╚══════════════════╝
 
 📀 *𝙄𝙣𝙛𝙤 𝙙𝙚𝙡 𝙫𝙞𝙙𝙚𝙤:*  
@@ -2698,7 +2698,7 @@ case 'gremio': {
         // Encabezado del mensaje con el total al principio
         let listaMiembros = 
 `╔══════════════════╗  
-║ 🏰 *Gremio Azura Ultra* 🏰 ║  
+║ 🏰 *Gremio Storm Ultra* 🏰 ║  
 ╚══════════════════╝  
 
 📋 *Total de miembros registrados:* ${miembros.length}\n`;
@@ -3387,7 +3387,7 @@ case 'allmenu': {
 
         // Construir menú
         let commandList = `╔════════════════╗  
-║  𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼 ALL MENU            
+║  STORM ALL MENU            
 ╚═════════════════╝  
         📜 *Menú Completo*  
 ━━━━━━━━━━━━━━━━━━━  
@@ -3411,7 +3411,7 @@ case 'allmenu': {
         await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/9bd11d81.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
     caption: commandList 
   },
   msg 
@@ -3434,7 +3434,7 @@ case 'menuowner': {
 
     const chatId = msg.key.remoteJid;
     const captionText = `╔═══════════╗  
-║    𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼      
+║    STORM     
 ╚═══════════╝  
 
             𝐌𝐄𝐍𝐔 𝐎𝐖𝐍𝐄𝐑  
@@ -3471,7 +3471,7 @@ case 'menuowner': {
 
       𝗗𝗲𝘀𝗮𝗿𝗿𝗼𝗹𝗹𝗮𝗱𝗼 𝗽𝗼𝗿: ʳᵘˢˢᵉˡˡ ˣᶻ  
 
-         𝙖𝙯𝙪𝙧𝙖 𝙪𝙡𝙩𝙧𝙖`;
+         STORM`;
 
     const videoResponse = await axios.get(
       "https://cdn.russellxz.click/83229a2d.jpeg",
@@ -3481,7 +3481,7 @@ case 'menuowner': {
 await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/83229a2d.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
     caption: captionText 
   },
   msg 
@@ -3505,7 +3505,7 @@ case 'menurpg': {
 
     const chatId = msg.key.remoteJid;
     const menuText = `╔═════════════════╗  
-║  𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼 MENU RPG       
+║  STORM MENU RPG       
 ╚═════════════════╝  
 
 ✦ 𝐁𝐈𝐄𝐍𝐕𝐄𝐍𝐈𝐃𝐎 𝐀𝐋 𝐌𝐄𝐍𝐔 𝐑𝐏𝐆 ✦  
@@ -3562,10 +3562,10 @@ Así te registras
 ➤ ${global.prefix}topper  
 
 ━━━━━━━━━━━━━━━━━━  
-𝗗𝗘𝗦𝗔𝗥𝗥𝗢𝗟𝗟𝗔𝗗𝗢 𝗣𝗢𝗥: russell xz  
+𝗗𝗘𝗦𝗔𝗥𝗥𝗢𝗟𝗟𝗔𝗗𝗢 𝗣𝗢𝗥: STORM  
 
 ╭────────────╮  
-│ 𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼          
+│    STORM       
 ╰────────────╯`;
 
     const videoUrl = "https://cdn.russellxz.click/0abb8549.jpeg";
@@ -3574,7 +3574,7 @@ Así te registras
 await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/0abb8549.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
     caption: menuText
   },
   msg 
@@ -3599,7 +3599,7 @@ case 'menu': {
 
     const chatId = msg.key.remoteJid;
     const captionText = `╔═════════════╗  
-║ 𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀  
+║   STORM  
 ║   🤖 𝘼𝙎𝙄𝙎𝙏𝙀𝙉𝙏𝙀 🤖     
 ╚═════════════╝  
 
@@ -3609,17 +3609,6 @@ case 'menu': {
 
 ⎔ 𝗣𝗿𝗲𝗳𝗶𝗷𝗼 𝗔𝗰𝘁𝘂𝗮𝗹: 『${global.prefix}』  
 ⎔ 𝗨𝘀𝗮 『${global.prefix}』 𝗮𝗻𝘁𝗲𝘀 𝗱𝗲 𝗰𝗮𝗱𝗮 𝗰𝗼𝗺𝗮𝗻𝗱𝗼.  
-
-╭──────────────╮  
-│ ✦ 𝗨𝗡𝗘𝗧𝗘 𝗔 𝗡𝗨𝗘𝗦𝗧𝗥𝗢 𝗦𝗜𝗦𝗧𝗘𝗠𝗔 𝗗𝗘 𝗦𝗨𝗕𝗕𝗢𝗧𝗦(𝗛𝗔𝗭𝗧𝗘 𝗕𝗢𝗧) ✦ │  
-╰──────────────╯  
-
-👾 *Hazte subbot en nuestro sistema, te voy a mostrar la lista de comandos para gestiónar/hacerte subbot: 
-
-⎔ ${global.prefix}serbot / ${global.prefix}jadibot
-⎔ ${global.prefix}sercode / ${global.prefix}code
-⎔ ${global.prefix}delbots
-° mas comandos en el menu de subbots...
 
 ╭──────────────╮  
 │ ✦ 𝙄𝙉𝙁𝙊𝙍𝙈𝘼𝘾𝙄𝙊𝙉 ✦ │  
@@ -3767,18 +3756,13 @@ case 'menu': {
 ⎔ ${global.prefix}Waifu
 ⎔ ${global.prefix}Neko
 
-╭─────────────────╮  
- ✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼 𝙀𝙎𝙏Á 𝙀𝙉 𝘾𝙊𝙉𝙎𝙏𝘼𝙉𝙏𝙀 𝘿𝙀𝙎𝘼𝙍𝙍𝙊𝙇𝙇𝙊. 
-  𝙎𝙀 𝘼𝙂𝙍𝙀𝙂𝘼𝙍Á𝙉 𝙈Á𝙎 𝙁𝙐𝙉𝘾𝙄𝙊𝙉𝙀𝙎 𝙋𝙍𝙊𝙉𝙏𝙊.   
-╰─────────────────╯  
-
-👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 𝙍𝙪𝙨𝙨𝙚𝙡𝙡 𝙓𝙕`;
+👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 Storm`;
 
     // Enviar usando sendMessage2
     await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/752ef2f1.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
     caption: captionText 
   },
   msg 
@@ -3802,7 +3786,7 @@ case 'menugrupo': {
 
     const chatId = msg.key.remoteJid;
     const captionText = `╔════════════════╗  
-║  𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀             
+║    STORM             
 ║   🎭 𝙼𝙴𝙽𝚄 𝙳𝙴 𝙶ℝ𝚄𝙿𝙾 🎭    
 ╚════════════════╝  
 
@@ -3855,7 +3839,7 @@ case 'menugrupo': {
 
 📌 𝐌Á𝐒 𝐂𝐎𝐌𝐀𝐍𝐃𝐎𝐒 𝐏𝐑Ó𝐗𝐈𝐌𝐀𝐌𝐄𝐍𝐓𝐄...
 
-⟢ 𝐀𝐙𝐔𝐑𝐀 𝐔𝐋𝐓𝐑𝐀 ⟣`;
+⟢ STORM ⟣`;
 
     const videoResponse = await axios.get("https://cdn.russellxz.click/c113150e.jpeg", { 
       responseType: 'arraybuffer' 
@@ -3864,7 +3848,7 @@ case 'menugrupo': {
     await sock.sendMessage2(
   chatId,
   {
-    image: { url: "https://cdn.russellxz.click/c113150e.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
     caption: captionText 
   },
   msg
@@ -13699,11 +13683,11 @@ case 'info':
       react: { text: "ℹ️", key: msg.key }
     });
 
-    const infoMessage = `╭─ *🤖 AZURA ULTRA* ─╮
+    const infoMessage = `╭─ *🤖 STORM* ─╮
 │ 🔹 *Prefijo actual:* ${global.prefix}
-│ 👑 *Dueño:* Russell xz
+│ 👑 *Dueño:* STORM
 │ 🛠️ *Bot desarrollado desde cero* con la ayuda de Chatgpt.
-│ 🚀 *Creado por:* Russell
+│ 🚀 *Creado por:* STORM
 │  
 ├─〔 📥 *Descargas Redes* 〕─
 │ 📌 *IG, TikTok y FB*  
@@ -13721,7 +13705,7 @@ case 'info':
 
     await sock.sendMessage2(msg.key.remoteJid,
   {
-    image: { url: "https://cdn.russellxz.click/6984cf1b.jpeg" }, 
+    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
     caption: infoMessage 
   },
   msg 
