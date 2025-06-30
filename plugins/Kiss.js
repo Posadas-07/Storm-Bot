@@ -1,14 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
-// 🔧 Aquí pones tus GIFs de abrazos (pueden ser .mp4)
 const gifUrls = [
   "https://cdn.russellxz.click/c6ea097b.mp4",
   "URL_DEL_GIF_2",
   "URL_DEL_GIF_3"
 ];
 
-// Frases personalizadas de abrazos
 const textos = [
   "🫂 *@1 abrazó tiernamente a @2* 💖",
   "💞 *@1 le dio un fuerte abrazo a @2* 🤗",
@@ -22,15 +20,15 @@ const textos = [
   "✨ *@1 y @2 se abrazaron con cariño* 💞"
 ];
 
-// Ruta para guardar estadísticas
 const HUG_PATH = path.resolve("hug_data.json");
 const HUG_COOLDOWN = 10 * 60 * 1000; // 10 minutos
 
 const handler = async (msg, { conn, args }) => {
-  const isGroup = msg.key.remoteJid.endsWith("@g.us");
-  const chatId = msg.key.remoteJid;
+  const chatId = msg.chat || msg.key.remoteJid;
+  const senderID = msg.sender || msg.key.participant || msg.key.remoteJid;
+  const senderNum = senderID.split("@")[0];
 
-  if (!isGroup) {
+  if (!chatId.endsWith("@g.us")) {
     return conn.sendMessage(chatId, {
       text: "⚠️ Este comando solo se puede usar en grupos."
     }, { quoted: msg });
@@ -39,9 +37,6 @@ const handler = async (msg, { conn, args }) => {
   await conn.sendMessage(chatId, {
     react: { text: "🤗", key: msg.key }
   });
-
-  const senderID = msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderID.split("@")[0];
 
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
@@ -79,23 +74,22 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  if (!data[chatId].abrazosDados[senderNum]) {
+  // Guardar estadísticas
+  if (!data[chatId].abrazosDados[senderNum])
     data[chatId].abrazosDados[senderNum] = { total: 0, usuarios: {} };
-  }
-  if (!data[chatId].abrazosDados[senderNum].usuarios[targetID]) {
+  if (!data[chatId].abrazosDados[senderNum].usuarios[targetID])
     data[chatId].abrazosDados[senderNum].usuarios[targetID] = { count: 0, last: 0 };
-  }
+
   data[chatId].abrazosDados[senderNum].total += 1;
   data[chatId].abrazosDados[senderNum].usuarios[targetID].count += 1;
   data[chatId].abrazosDados[senderNum].usuarios[targetID].last = ahora;
 
   const targetNum = targetID.split("@")[0];
-  if (!data[chatId].abrazosRecibidos[targetNum]) {
+  if (!data[chatId].abrazosRecibidos[targetNum])
     data[chatId].abrazosRecibidos[targetNum] = { total: 0, usuarios: {} };
-  }
-  if (!data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum]) {
+  if (!data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum])
     data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum] = 0;
-  }
+
   data[chatId].abrazosRecibidos[targetNum].total += 1;
   data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum] += 1;
 
@@ -106,11 +100,13 @@ const handler = async (msg, { conn, args }) => {
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetNum}`);
 
+  const menciones = [senderID, targetID].filter(Boolean);
+
   await conn.sendMessage(chatId, {
     video: { url: gif },
     gifPlayback: true,
     caption: texto,
-    mentions: [senderID, targetID]
+    mentions: menciones
   }, { quoted: msg });
 };
 
