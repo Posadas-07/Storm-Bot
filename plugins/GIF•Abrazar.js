@@ -1,40 +1,41 @@
-const handler = async (msg, { conn }) => {
+const handler = async (m, { conn }) => {
   try {
-    // Obtener ID del remitente
-    const senderId = msg.sender || msg.key?.participant || msg.key?.remoteJid || '0@s.whatsapp.net'
-    const sender = '@' + senderId.split('@')[0]
+    const sender = m.sender || '0@s.whatsapp.net'
+    const senderTag = '@' + sender.split('@')[0]
 
-    // Obtener objetivo del abrazo
-    const mentionedJid = (msg.mentionedJid && msg.mentionedJid[0]) || null
-    const quotedJid = (msg.quoted && msg.quoted.sender) || null
-    const target = mentionedJid || quotedJid || null
+    // Detectar si hay alguien mencionado o mensaje citado
+    const mentioned = m.mentionedJid?.[0]
+    const quoted = m.quoted?.sender
+    const target = mentioned || quoted || null
+    const targetTag = target ? '@' + target.split('@')[0] : '¡alguien!'
 
-    const receiver = target ? '@' + target.split('@')[0] : '¡alguien!'
-    const texto = `🤗 ${sender} le dio un gran abrazo a ${receiver}`
+    const texto = `🤗 ${senderTag} le dio un gran abrazo a ${targetTag}`
 
-    // Lista de GIFs
     const gifs = [
       'https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif',
       'https://media.giphy.com/media/od5H3PmEG5EVq/giphy.gif',
       'https://media.giphy.com/media/xT39CXg70nNS0MFNLy/giphy.gif',
       'https://media.giphy.com/media/BXrwTdoho6hkQ/giphy.gif'
     ]
+
     const gif = gifs[Math.floor(Math.random() * gifs.length)]
 
-    // Solo añadir menciones si existen
-    const menciones = [senderId]
+    // Solo incluir menciones si existen
+    const menciones = []
+    if (sender) menciones.push(sender)
     if (target) menciones.push(target)
 
-    await conn.sendMessage(msg.chat, {
+    await conn.sendMessage(m.chat, {
       video: { url: gif },
       gifPlayback: true,
       caption: texto,
       mentions: menciones
     })
-
-  } catch (e) {
-    console.error('Error en el comando abrazar:', e)
-    await conn.sendMessage(msg.chat, { text: '⚠️ Ocurrió un error al intentar abrazar. Intenta de nuevo.' })
+  } catch (err) {
+    console.error('Error en .abrazar:', err)
+    await conn.sendMessage(m.chat, {
+      text: '⚠️ Hubo un error al enviar el abrazo. Intenta de nuevo más tarde.'
+    })
   }
 }
 
