@@ -1,4 +1,4 @@
-// 🔱 Plugin estilo Killua Bot adaptado por ChatGPT
+// 🔱 Plugin reparado 100% para estilo Killua Bot
 const videos = [
   'https://telegra.ph/file/6a3aa01fabb95e3558eec.mp4',
   'https://telegra.ph/file/0e5b24907be34da0cbe84.mp4',
@@ -10,14 +10,13 @@ const videos = [
   'https://telegra.ph/file/5866f0929bf0c8fe6a909.mp4'
 ];
 
-module.exports = async (msg, { conn, text, participants }) => {
-  const mentioned = msg.mentionedJid && msg.mentionedJid[0];
-  const quoted = msg.quoted ? msg.quoted.sender : null;
-  const who = mentioned || quoted || msg.sender;
+module.exports = async (msg, { conn }) => {
+  let who = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
 
-  const name = await conn.getName(who);
-  const name2 = await conn.getName(msg.sender);
+  let name = await conn.getName(who, msg).catch(() => who);
+  let name2 = await conn.getName(msg.sender, msg).catch(() => msg.sender);
 
+  // Reacciona con emoji
   await conn.sendMessage(msg.chat, {
     react: {
       text: '🤗',
@@ -26,9 +25,9 @@ module.exports = async (msg, { conn, text, participants }) => {
   });
 
   let texto;
-  if (mentioned) {
+  if (msg.mentionedJid?.length) {
     texto = `*${name2}* le dio un fuerte abrazo a *${name}* 🫂`;
-  } else if (quoted) {
+  } else if (msg.quoted) {
     texto = `*${name2}* abrazó a *${name}* 🫂`;
   } else {
     texto = `*${name2}* se abrazó a sí mismo 🥺`;
