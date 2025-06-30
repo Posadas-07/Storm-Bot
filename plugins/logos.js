@@ -1,6 +1,6 @@
-// Código adaptado al estilo Killua por Sisked
+// Plugin de logos estilo Killua - CommonJS
 
-import { Maker } from 'imagemaker.js';
+const { Maker } = require('imagemaker.js');
 
 const efectos = {
   logocorazon: 'https://en.ephoto360.com/text-heart-flashlight-188.html',
@@ -39,24 +39,23 @@ const efectos = {
   logoportadacounter: 'https://en.ephoto360.com/create-youtube-banner-game-cs-go-online-403.html',
 };
 
-const handler = async (m, { conn, args, command }) => {
+module.exports = async (m, { conn, args, command }) => {
   const texto = args.join(' ');
-  if (!texto) throw '[❗] 𝙄𝙉𝙂𝙍𝙀𝙎𝙀 𝙐𝙉 𝙏𝙀𝙓𝙏𝙊';
+  if (!texto) return conn.reply(m.chat, '[❗] Ingresa un texto para el logo.', m);
 
   const url = efectos[command.toLowerCase()];
-  if (!url) throw '[❗] 𝙀𝙁𝙀𝘾𝙏𝙊 𝙉𝙊 𝘿𝙄𝙎𝙋𝙊𝙉𝙄𝘽𝙇𝙀';
+  if (!url) return conn.reply(m.chat, '[❗] Comando de logo no válido.', m);
 
   try {
-    await conn.reply(m.chat, '[❗] 𝙀𝙇𝘼𝘽𝙊𝙍𝘼𝙉𝘿𝙊 𝙇𝙊𝙂𝙊, 𝘼𝙂𝙐𝘼𝙍𝘿𝙀 𝙐𝙉 𝙋𝙊𝘾𝙊...', m);
+    await conn.reply(m.chat, '[🖌️] Creando logo, espere un momento...', m);
     const res = await new Maker().Ephoto360(url, [texto]);
     await conn.sendFile(m.chat, res.imageUrl, 'logo.jpg', null, m);
   } catch (e) {
-    await conn.reply(m.chat, '[❗] 𝙀𝙍𝙍𝙊𝙍. 𝙋𝙊𝙍 𝙁𝘼𝙑𝙊𝙍, 𝙑𝙐𝙀𝙇𝙑𝘼 𝘼 𝙄𝙉𝙏𝙀𝙉𝙏𝘼𝙍𝙇𝙊', m);
+    console.error(e);
+    await conn.reply(m.chat, '[❗] Error generando el logo. Intente más tarde.', m);
   }
 };
 
-handler.help = Object.keys(efectos);
-handler.tags = ['fun'];
-handler.command = new RegExp(`^(${Object.keys(efectos).join('|')})$`, 'i');
-
-export default handler;
+module.exports.help = Object.keys(efectos);
+module.exports.tags = ['fun'];
+module.exports.command = new RegExp(`^(${Object.keys(efectos).join('|')})$`, 'i');
