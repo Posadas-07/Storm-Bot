@@ -3,7 +3,7 @@ const path = require("path");
 
 const gifUrls = [
   "https://qu.ax/GQLO.mp4" // GIF de matar
-  "https://cdn.russellxz.click/dcc7e50a.mp4",
+  "https://cdn.russellxz.click/dcc7e50a.mp4"
 ];
 
 const textos = [
