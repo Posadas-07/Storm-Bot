@@ -10,6 +10,12 @@ const streamPipe = promisify(pipeline);
 // Almacena tareas pendientes por previewMessageId
 const pending = {};
 
+// Cooldown por usuario (2 minutos)
+const COOLDOWN_FILE = path.join(__dirname, "../cooldowns.json");
+const COOLDOWN_TIME = 2 * 60 * 1000; // 2 minutos
+
+if (!fs.existsSync(COOLDOWN_FILE)) fs.writeFileSync(COOLDOWN_FILE, "{}");
+
 module.exports = async (msg, { conn, text }) => {
   const subID = (conn.user.id || "").split(":")[0] + "@s.whatsapp.net";
   const pref = (() => {
@@ -21,6 +27,22 @@ module.exports = async (msg, { conn, text }) => {
     }
   })();
 
+  // Cooldown per user
+  let cooldowns = JSON.parse(fs.readFileSync(COOLDOWN_FILE));
+  const senderID = (msg.key.participant || msg.key.remoteJid).split("@")[0];
+  const now = Date.now();
+
+  if (cooldowns[senderID] && now - cooldowns[senderID] < COOLDOWN_TIME) {
+    const remaining = Math.ceil((COOLDOWN_TIME - (now - cooldowns[senderID])) / 1000);
+    return conn.sendMessage(msg.key.remoteJid, {
+      text: `⏱️ Espera *${remaining} segundos* antes de volver a usar este comando.`,
+      mentions: [msg.key.participant]
+    }, { quoted: msg });
+  }
+
+  cooldowns[senderID] = now;
+  fs.writeFileSync(COOLDOWN_FILE, JSON.stringify(cooldowns, null, 2));
+
   if (!text) {
     return conn.sendMessage(
       msg.key.remoteJid,
@@ -29,12 +51,10 @@ module.exports = async (msg, { conn, text }) => {
     );
   }
 
-  // reacción de carga
   await conn.sendMessage(msg.key.remoteJid, {
     react: { text: "⏳", key: msg.key }
   });
 
-  // búsqueda
   const res = await yts(text);
   const video = res.videos[0];
   if (!video) {
@@ -50,7 +70,7 @@ module.exports = async (msg, { conn, text }) => {
 
   const caption = `
 ╔═══════════════╗
-║✦ 𝘼𝙕𝙐𝙍𝘼 𝙐𝗹𝘁𝗋𝗮 2.0 BOT✦
+║✦ STORM 2.0 BOT✦
 ╚═══════════════╝
 📀 Info del video:
 ╭───────────────╮
@@ -74,14 +94,12 @@ module.exports = async (msg, { conn, text }) => {
    𖥔 Azura Ultra 2.0 Bot 𖥔
 ═════════════════════`.trim();
 
-  // envía preview
   const preview = await conn.sendMessage(
     msg.key.remoteJid,
     { image: { url: video.thumbnail }, caption },
     { quoted: msg }
   );
 
-  // guarda trabajo
   pending[preview.key.id] = {
     chatId: msg.key.remoteJid,
     videoUrl,
@@ -90,17 +108,14 @@ module.exports = async (msg, { conn, text }) => {
     done: { audio: false, video: false, audioDoc: false, videoDoc: false }
   };
 
-  // confirmación
   await conn.sendMessage(msg.key.remoteJid, {
     react: { text: "✅", key: msg.key }
   });
 
-  // listener único
   if (!conn._playproListener) {
     conn._playproListener = true;
     conn.ev.on("messages.upsert", async ev => {
       for (const m of ev.messages) {
-        // 1) REACCIONES
         if (m.message?.reactionMessage) {
           const { key: reactKey, text: emoji } = m.message.reactionMessage;
           const job = pending[reactKey.id];
@@ -109,7 +124,6 @@ module.exports = async (msg, { conn, text }) => {
           }
         }
 
-        // 2) RESPUESTAS CITADAS
         try {
           const context = m.message?.extendedTextMessage?.contextInfo;
           const citado = context?.stanzaId;
@@ -121,28 +135,22 @@ module.exports = async (msg, { conn, text }) => {
           const job = pending[citado];
           const chatId = m.key.remoteJid;
           if (citado && job) {
-            // AUDIO
             if (["1", "audio", "4", "audiodoc"].includes(texto)) {
               const docMode = ["4", "audiodoc"].includes(texto);
               await conn.sendMessage(chatId, { react: { text: docMode ? "📄" : "🎵", key: m.key } });
               await conn.sendMessage(chatId, { text: `🎶 Descargando audio...` }, { quoted: m });
               await downloadAudio(conn, job, docMode, m);
-            }
-            // VIDEO
-            else if (["2", "video", "3", "videodoc"].includes(texto)) {
+            } else if (["2", "video", "3", "videodoc"].includes(texto)) {
               const docMode = ["3", "videodoc"].includes(texto);
               await conn.sendMessage(chatId, { react: { text: docMode ? "📁" : "🎬", key: m.key } });
               await conn.sendMessage(chatId, { text: `🎥 Descargando video...` }, { quoted: m });
               await downloadVideo(conn, job, docMode, m);
-            }
-            // AYUDA
-            else {
+            } else {
               await conn.sendMessage(chatId, {
                 text: `⚠️ Opciones válidas:\n1/audio, 4/audiodoc → audio\n2/video, 3/videodoc → video`
               }, { quoted: m });
             }
 
-            // elimina de pending después de 5 minutos
             if (!job._timer) {
               job._timer = setTimeout(() => delete pending[citado], 5 * 60 * 1000);
             }
