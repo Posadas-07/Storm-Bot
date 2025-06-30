@@ -4631,11 +4631,11 @@ case 'personalidad': {
 }
         
 case 'tagall':
-case 'invocar':
 case 'todos': {
   try {
     const chatId = msg.key.remoteJid;
-    const sender = (msg.key.participant || msg.key.remoteJid).replace(/[^0-9]/g, "");
+    const senderId = msg.key.participant || msg.key.remoteJid;
+    const senderNum = senderId.replace(/[^0-9]/g, "");
     const isGroup = chatId.endsWith("@g.us");
     const isBotMessage = msg.key.fromMe;
 
@@ -4643,16 +4643,19 @@ case 'todos': {
     await sock.sendMessage(chatId, { react: { text: "🔊", key: msg.key } });
 
     if (!isGroup) {
-      await sock.sendMessage(chatId, { text: "⚠️ *Este comando solo se puede usar en grupos.*" }, { quoted: msg });
+      await sock.sendMessage(chatId, {
+        text: "⚠️ *Este comando solo se puede usar en grupos.*"
+      }, { quoted: msg });
       return;
     }
 
     // Obtener metadata del grupo y verificar si es admin
     const metadata = await sock.groupMetadata(chatId);
-    const participant = metadata.participants.find(p => p.id.includes(sender));
+    const participant = metadata.participants.find(p => p.id.includes(senderNum));
     const isAdmin = participant?.admin === "admin" || participant?.admin === "superadmin";
+    const isOwner = global.owner.some(([id]) => id === senderNum);
 
-    if (!isAdmin && !isOwner(sender) && !isBotMessage) {
+    if (!isAdmin && !isOwner && !isBotMessage) {
       await sock.sendMessage(chatId, {
         text: "❌ *Este comando solo puede usarlo un administrador o el dueño del bot.*"
       }, { quoted: msg });
@@ -4665,24 +4668,30 @@ case 'todos': {
     const args = messageText.trim().split(" ").slice(1);
     const extraMsg = args.join(" ");
 
-    let finalMsg = "━〔 *📢 INVOCACIÓN 📢* 〕━➫\n";
-    finalMsg += "٩(͡๏̯͡๏)۶ Por Azura Ultra ٩(͡๏̯͡๏)۶\n";
+    let finalMsg = "━〔 *📢 INVOCACIÓN MASIVA 📢* 〕━\n";
+    finalMsg += `🙋 Llamado por: @${senderNum}\n`;
     if (extraMsg.trim().length > 0) {
-      finalMsg += `\n❑ Mensaje: ${extraMsg}\n\n`;
+      finalMsg += `📝 Mensaje: ${extraMsg}\n\n`;
     } else {
       finalMsg += "\n";
     }
     finalMsg += mentionList;
 
     const mentionIds = participants.map(p => p.id);
+    mentionIds.push(`${senderNum}@s.whatsapp.net`);
+
+    const gifUrl = "https://cdn.russellxz.click/0c466280.mp4"; // Puedes cambiarlo
 
     await sock.sendMessage(chatId, {
-      text: finalMsg,
+      video: { url: gifUrl },
+      caption: finalMsg,
+      gifPlayback: true,
+      mimetype: 'video/mp4',
       mentions: mentionIds
     }, { quoted: msg });
 
   } catch (error) {
-    console.error("❌ Error en el comando tagall:", error);
+    console.error("❌ Error en el comando todos:", error);
     await sock.sendMessage(msg.key.remoteJid, {
       text: "❌ *Ocurrió un error al ejecutar el comando tagall.*"
     }, { quoted: msg });
