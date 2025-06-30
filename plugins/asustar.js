@@ -1,16 +1,14 @@
-module.exports = async (m, { conn, args, participants }) => {
+module.exports = async (m, { conn, args }) => {
   const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
-  // Detectar si hay mención
+  // Obtener JID de la víctima
   let mentionedJid = m.mentionedJid && m.mentionedJid[0]
     ? m.mentionedJid[0]
     : args[0]
-      ? args[0].replace(/[@+]/g, '') + '@s.whatsapp.net'
-      : null;
+      ? args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net'
+      : m.sender;
 
-  if (!mentionedJid) return conn.reply(m.chat, '👻 Etiqueta a alguien para asustarlo\n\nEjemplo:\n*.asustar @usuario*', m);
-
-  const nombreVictima = '@' + mentionedJid.replace(/@.+/, '');
+  const nombreVictima = '@' + mentionedJid.split('@')[0];
 
   const fases = [
     `*[ 👾 INICIANDO ATAQUE A ${nombreVictima}... ]*`,
@@ -38,4 +36,4 @@ module.exports = async (m, { conn, args, participants }) => {
 
 module.exports.command = ['asustar'];
 module.exports.tags = ['fun'];
-module.exports.help = ['asustar @usuario'];
+module.exports.help = ['asustar @usuario', 'asustar 51912345678'];
