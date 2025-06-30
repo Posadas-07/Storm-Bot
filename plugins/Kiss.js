@@ -50,11 +50,27 @@ const handler = async (msg, { conn, args, isOwner }) => {
     return conn.sendMessage(chatId, { text: "😅 No puedes besarte a ti mismo." }, { quoted: msg });
   }
 
-  let data = fs.existsSync(KISS_PATH) ? JSON.parse(fs.readFileSync(KISS_PATH)) : {};
-  if (!data[chatId]) data[chatId] = { besosDados: {}, besosRecibidos: {}, cooldown: {} };
+  // Verificar que la estructura exista
+  let data = {};
+  if (fs.existsSync(KISS_PATH)) {
+    try {
+      data = JSON.parse(fs.readFileSync(KISS_PATH));
+    } catch {
+      data = {};
+    }
+  }
+
+  if (!data[chatId]) {
+    data[chatId] = {
+      besosDados: {},
+      besosRecibidos: {},
+      cooldown: {}
+    };
+  }
 
   const ahora = Date.now();
 
+  // Cooldown
   if (!isOwner) {
     const lastUse = data[chatId].cooldown?.[senderNum] || 0;
     if (ahora - lastUse < KISS_COOLDOWN) {
@@ -67,7 +83,7 @@ const handler = async (msg, { conn, args, isOwner }) => {
     data[chatId].cooldown[senderNum] = ahora;
   }
 
-  // Guardar estadísticas
+  // Estadísticas de besos dados
   if (!data[chatId].besosDados[senderNum]) {
     data[chatId].besosDados[senderNum] = { total: 0, usuarios: {} };
   }
@@ -78,6 +94,7 @@ const handler = async (msg, { conn, args, isOwner }) => {
   data[chatId].besosDados[senderNum].usuarios[targetID].count += 1;
   data[chatId].besosDados[senderNum].usuarios[targetID].last = ahora;
 
+  // Estadísticas de besos recibidos
   const targetNum = targetID.split("@")[0];
   if (!data[chatId].besosRecibidos[targetNum]) {
     data[chatId].besosRecibidos[targetNum] = { total: 0, usuarios: {} };
@@ -88,8 +105,10 @@ const handler = async (msg, { conn, args, isOwner }) => {
   data[chatId].besosRecibidos[targetNum].total += 1;
   data[chatId].besosRecibidos[targetNum].usuarios[senderNum] += 1;
 
+  // Guardar en disco
   fs.writeFileSync(KISS_PATH, JSON.stringify(data, null, 2));
 
+  // Mensaje final
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
