@@ -1,47 +1,66 @@
-const handler = async (m, { conn }) => {
-  try {
-    const sender = m.sender || '0@s.whatsapp.net'
-    const senderTag = '@' + sender.split('@')[0]
+// 🔱 Código adaptado al estilo Killua Bot por ChatGPT
+const fetch = require('node-fetch');
 
-    // Detectar si hay alguien mencionado o mensaje citado
-    const mentioned = m.mentionedJid?.[0]
-    const quoted = m.quoted?.sender
-    const target = mentioned || quoted || null
-    const targetTag = target ? '@' + target.split('@')[0] : '¡alguien!'
+module.exports = {
+  command: ['hug', 'abrazar'],
+  tags: ['anime'],
+  help: ['hug @tag', 'abrazar @tag'],
+  group: true,
+  premium: false,
+  owner: false,
+  admin: false,
 
-    const texto = `🤗 ${senderTag} le dio un gran abrazo a ${targetTag}`
+  async handler(msg, { conn, participants }) {
+    let who;
 
-    const gifs = [
-      'https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif',
-      'https://media.giphy.com/media/od5H3PmEG5EVq/giphy.gif',
-      'https://media.giphy.com/media/xT39CXg70nNS0MFNLy/giphy.gif',
-      'https://media.giphy.com/media/BXrwTdoho6hkQ/giphy.gif'
-    ]
+    if (msg.mentionedJid.length > 0) {
+      who = msg.mentionedJid[0];
+    } else if (msg.quoted) {
+      who = msg.quoted.sender;
+    } else {
+      who = msg.sender;
+    }
 
-    const gif = gifs[Math.floor(Math.random() * gifs.length)]
+    const name = await conn.getName(who);
+    const name2 = await conn.getName(msg.sender);
 
-    // Solo incluir menciones si existen
-    const menciones = []
-    if (sender) menciones.push(sender)
-    if (target) menciones.push(target)
+    // Emoji de reacción personalizado
+    await conn.sendMessage(msg.chat, {
+      react: {
+        text: '🤗',
+        key: msg.key
+      }
+    });
 
-    await conn.sendMessage(m.chat, {
-      video: { url: gif },
+    // Frase personalizada con markdown
+    let texto;
+    if (msg.mentionedJid.length > 0) {
+      texto = `*${name2}* le dio un fuerte abrazo a *${name}* 🫂`;
+    } else if (msg.quoted) {
+      texto = `*${name2}* abrazó a *${name}* 🫂`;
+    } else {
+      texto = `*${name2}* se abrazó a sí mismo 🥺`;
+    }
+
+    // Lista de videos tipo gif hug
+    const videos = [
+      'https://telegra.ph/file/6a3aa01fabb95e3558eec.mp4',
+      'https://telegra.ph/file/0e5b24907be34da0cbe84.mp4',
+      'https://telegra.ph/file/6bc3cd10684f036e541ed.mp4',
+      'https://telegra.ph/file/3e443a3363a90906220d8.mp4',
+      'https://telegra.ph/file/56d886660696365f9696b.mp4',
+      'https://telegra.ph/file/3eeadd9d69653803b33c6.mp4',
+      'https://telegra.ph/file/436624e53c5f041bfd597.mp4',
+      'https://telegra.ph/file/5866f0929bf0c8fe6a909.mp4'
+    ];
+
+    const video = videos[Math.floor(Math.random() * videos.length)];
+
+    await conn.sendMessage(msg.chat, {
+      video: { url: video },
       gifPlayback: true,
       caption: texto,
-      mentions: menciones
-    })
-  } catch (err) {
-    console.error('Error en .abrazar:', err)
-    await conn.sendMessage(m.chat, {
-      text: '⚠️ Hubo un error al enviar el abrazo. Intenta de nuevo más tarde.'
-    })
+      mentions: [who]
+    }, { quoted: msg });
   }
-}
-
-handler.command = ['abrazar']
-handler.tags = ['expresion']
-handler.help = ['abrazar @usuario']
-handler.register = true
-
-module.exports = handler
+};
