@@ -3354,7 +3354,6 @@ case 'allmenu': {
     try {
         const fs = require("fs");
 
-        // Verificar archivo de comandos
         const mainFilePath = "./main.js";
         if (!fs.existsSync(mainFilePath)) {
             await sock.sendMessage2(
@@ -3367,12 +3366,11 @@ case 'allmenu': {
 
         const chatId = msg.key.remoteJid;
 
-        // Reacción inicial (se mantiene sendMessage normal)
+        // Reacción inicial
         await sock.sendMessage(chatId, { 
             react: { text: "📜", key: msg.key }
         });
 
-        // Leer y procesar comandos
         const mainFileContent = fs.readFileSync(mainFilePath, "utf-8");
         const commandRegex = /case\s+['"]([^'"]+)['"]:/g;
         let commands = [];
@@ -3385,7 +3383,6 @@ case 'allmenu': {
         commands = [...new Set(commands)].sort();
         let totalComandos = commands.length;
 
-        // Construir menú
         let commandList = `╔════════════════╗  
 ║  STORM ALL MENU            
 ╚═════════════════╝  
@@ -3402,20 +3399,22 @@ case 'allmenu': {
         });
 
         commandList += `━━━━━━━━━━━━━━━━━━━  
-👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 𝙍𝙪𝙨𝙨𝙚𝙡𝙡 𝙓𝙕  
+👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 Storm 
 ╭─────────────╮  
-│    𝘼𝙕𝙐𝙍𝘼 𝙐𝙇𝙏𝙍𝘼    
+│    STORM   
 ╰─────────────╯`;
 
-        // Enviar usando sendMessage2
+        // Enviar menú con gif animado como video
         await sock.sendMessage2(
-  chatId,
-  {
-    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
-    caption: commandList 
-  },
-  msg 
-);
+            chatId,
+            {
+                video: { url: "https://cdn.russellxz.click/362e3f06.mp4" }, // Pon aquí tu URL de GIF en .mp4
+                gifPlayback: true,
+                caption: commandList
+            },
+            msg
+        );
+
     } catch (error) {
         console.error("Error en comando allmenu:", error);
         await sock.sendMessage2(
@@ -3425,8 +3424,7 @@ case 'allmenu': {
         );
     }
     break;
-}
-
+}    
 case 'menuowner': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
@@ -3858,7 +3856,7 @@ case 'menugrupo': {
 ⟢ STORM ⟣`;
 
     // Puedes cambiar este link por cualquier GIF en formato .mp4
-    const gifUrl = "https://cdn.russellxz.click/4ebd26ae.mp4";
+    const gifUrl = "https://cdn.russellxz.click/a7d05a77.mp4";
 
     await sock.sendMessage(chatId, {
       video: { url: gifUrl },
@@ -4654,7 +4652,7 @@ case 'todos': {
     const extraMsg = args.join(" ");
 
     let finalMsg = `╔『 🔊 MENCIÓN MASIVA 』╗\n`;
-    finalMsg += `╟🔹 *STORM BOT TE HABLA*\n`;
+    finalMsg += `╟🔹 *LLAMADO DEL ALPHA*\n`;
     finalMsg += `╟👤 *Invocado por:* @${sender}\n`;
     if (extraMsg.trim().length > 0) {
       finalMsg += `╟💬 *Mensaje:* ${extraMsg}\n`;
