@@ -110,17 +110,17 @@ const handler = async (msg, { conn, args }) => {
   fs.writeFileSync(KISS_PATH, JSON.stringify(data, null, 2));
 
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
-  const texto = textos[Math.floor(Math.random() * textos.length)]
-    .replace("@1", `@${senderNum}`)
-    .replace("@2", `@${senderNum}`);
+  const texto = textos[Math.floor(Math.random() * const numero2 = `+${targetID.replace(/@.+/, "")}`;
+const texto = textos[Math.floor(Math.random() * textos.length)]
+  .replace("@1", `@${senderNum}`)
+  .replace("@2", numero2);
 
-  await conn.sendMessage(chatId, {
-    video: { url: gif },
-    gifPlayback: true,
-    caption: texto,
-    mentions: [senderID, targetID]
-  }, { quoted: msg });
-};
+await conn.sendMessage(chatId, {
+  video: { url: gif },
+  gifPlayback: true,
+  caption: texto,
+  mentions: [senderID, targetID] // mención real a ambos
+}, { quoted: msg });
 
 handler.command = ["kiss"];
 module.exports = handler;
