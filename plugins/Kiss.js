@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const axios = require("axios"); // 👈 importante
 
 const gifUrls = [
   "https://cdn.russellxz.click/5b056a4b.mp4",
@@ -68,7 +69,6 @@ const handler = async (msg, { conn, args, isOwner }) => {
 
   const ahora = Date.now();
 
-  // 🚫 Cooldown general solo si NO es owner
   if (!isOwner) {
     const lastUse = data[chatId].cooldown?.[senderNum] || 0;
     if (ahora - lastUse < KISS_COOLDOWN) {
@@ -81,7 +81,6 @@ const handler = async (msg, { conn, args, isOwner }) => {
     data[chatId].cooldown[senderNum] = ahora;
   }
 
-  // Registro de besos dados
   if (!data[chatId].besosDados[senderNum]) {
     data[chatId].besosDados[senderNum] = { total: 0, usuarios: {} };
   }
@@ -92,7 +91,6 @@ const handler = async (msg, { conn, args, isOwner }) => {
   data[chatId].besosDados[senderNum].usuarios[targetID].count += 1;
   data[chatId].besosDados[senderNum].usuarios[targetID].last = ahora;
 
-  // Registro de besos recibidos
   const targetNum = targetID.split("@")[0];
   if (!data[chatId].besosRecibidos[targetNum]) {
     data[chatId].besosRecibidos[targetNum] = { total: 0, usuarios: {} };
@@ -110,13 +108,24 @@ const handler = async (msg, { conn, args, isOwner }) => {
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetNum}`);
 
-  // ✅ Envío del gif como video con gifPlayback
-  await conn.sendMessage(chatId, {
-    video: gif,
-    gifPlayback: true,
-    caption: texto,
-    mentions: [senderID, targetID]
-  }, { quoted: msg });
+  try {
+    const response = await axios.get(gif, { responseType: "arraybuffer" });
+    const buffer = Buffer.from(response.data, "binary");
+
+    await conn.sendMessage(chatId, {
+      video: buffer,
+      gifPlayback: true,
+      caption: texto,
+      mentions: [senderID, targetID]
+    }, { quoted: msg });
+
+  } catch (err) {
+    console.error("❌ Error al enviar el video:", err);
+    await conn.sendMessage(chatId, {
+      text: "❌ Ocurrió un error al cargar el beso, intenta nuevamente más tarde.",
+      mentions: [senderID]
+    }, { quoted: msg });
+  }
 };
 
 handler.command = ["kiss"];
