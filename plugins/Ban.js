@@ -1,10 +1,12 @@
+const axios = require("axios");
+
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
-  // Verificar si es el dueño
+  // Solo dueño
   const isOwner = global.owner.some(([id]) => id === senderNum);
   if (!isOwner) {
     return conn.sendMessage(chatId, {
@@ -34,7 +36,6 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  // Mensaje final con diseño
   const mensajeHack = `
 ╭━━━[ *INICIANDO ATAQUE* ]━━━╮
 ┃ 👤 Objetivo: @${targetNum}
@@ -49,10 +50,27 @@ const handler = async (msg, { conn }) => {
 😈 *Todo fue una broma. No llores.*
 `;
 
+  // Enviar mensaje con mención
   await conn.sendMessage(chatId, {
     text: mensajeHack,
     mentions: [target]
   }, { quoted: msg });
+
+  // Descargar y enviar audio desde URL
+  try {
+    const audioUrl = "https://www.myinstants.com/media/sounds/laugh-evil.mp3";
+    const response = await axios.get(audioUrl, { responseType: 'arraybuffer' });
+
+    await conn.sendMessage(chatId, {
+      audio: Buffer.from(response.data),
+      mimetype: 'audio/mp4',
+      ptt: true
+    }, { quoted: msg });
+  } catch (e) {
+    await conn.sendMessage(chatId, {
+      text: "⚠️ Ocurrió un error al enviar el audio. Verifica que la URL esté activa."
+    }, { quoted: msg });
+  }
 };
 
 handler.command = ["hackear", "asustar"];
