@@ -112,7 +112,7 @@ const handler = async (msg, { conn, args }) => {
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
-    .replace("@2", `@${targetNum}`);
+    .replace("@2", `@${senderNum}`);
 
   await conn.sendMessage(chatId, {
     video: { url: gif },
