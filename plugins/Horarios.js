@@ -1,6 +1,6 @@
 const moment = require('moment-timezone');
 
-const handler = async (msg, { sock }) => {
+const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
 
   const zonas = [
@@ -24,13 +24,13 @@ const handler = async (msg, { sock }) => {
   let texto = '🌐 *HORARIO INTERNACIONAL* 🌐\n\n';
 
   for (let lugar of zonas) {
-    const hora = moment().tz(lugar.zona).format('hh:mm:ss A'); // 12h formato
+    const hora = moment().tz(lugar.zona).format('hh:mm:ss A');
     texto += `🕒 ${lugar.nombre}: *${hora}*\n`;
   }
 
   texto += `\n📆 Fecha: *${moment().format('dddd, DD MMMM YYYY')}*`;
 
-  await sock.sendMessage(chatId, {
+  await conn.sendMessage(chatId, {
     text: texto
   }, { quoted: msg });
 };
