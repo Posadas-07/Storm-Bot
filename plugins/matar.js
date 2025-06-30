@@ -3,9 +3,9 @@ const path = require("path");
 
 const gifUrls = [
   "https://qu.ax/GQLO.mp4",
-  "https://cdn.russellxz.click/asesinato1.mp4",
-  "https://cdn.russellxz.click/asesinato2.mp4",
-  "https://cdn.russellxz.click/asesinato3.mp4"
+  "https://cdn.russellxz.click/55d0a83c.mp4",
+  "https://cdn.russellxz.click/dcc7e50a.mp4",
+  "https://cdn.russellxz.click/695938b4.mp4"
   // Agrega más URLs de gifs animados aquí
 ];
 
