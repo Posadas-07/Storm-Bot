@@ -27,35 +27,40 @@ const handler = async (msg, { conn }) => {
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "⚠️ Responde al mensaje del usuario que quieres banear."
+      text: "⚠️ Responde al mensaje del usuario que quieres hackear (broma)."
     }, { quoted: msg });
   }
 
   const targetNum = target.replace(/[^0-9]/g, "");
   if (global.owner.some(([id]) => id === targetNum)) {
     return conn.sendMessage(chatId, {
-      text: "❌ No puedes banear al *dueño del bot*."
+      text: "❌ No puedes hackear al *dueño del bot*."
     }, { quoted: msg });
   }
 
-  const banPath = path.resolve("./ban.json");
-  const banData = fs.existsSync(banPath) ? JSON.parse(fs.readFileSync(banPath)) : {};
-  if (!banData[chatId]) banData[chatId] = [];
+  // Fases de la broma
+  const fases = [
+    `🔍 Iniciando escaneo de WhatsApp de @${targetNum}...`,
+    `📡 Localizando mensajes en la nube...`,
+    `📥 Extrayendo stickers, notas de voz y estados...`,
+    `🔐 Descifrando cifrado de extremo a extremo...`,
+    `📲 Clonando WhatsApp...`,
+    `⚠️ Infección de datos en proceso...`,
+    `🧠 Accediendo a memoria interna...`,
+    `🚫 Eliminando privacidad...`,
+    `✅ Hackeo completo: WhatsApp de @${targetNum} ha sido comprometido.`,
+    `😱 *Broma completada con éxito.*`
+  ];
 
-  if (!banData[chatId].includes(target)) {
-    banData[chatId].push(target);
-    fs.writeFileSync(banPath, JSON.stringify(banData, null, 2));
+  // Enviar mensaje por mensaje
+  for (let fase of fases) {
     await conn.sendMessage(chatId, {
-      text: `🚫 Usuario @${target.split("@")[0]} ha sido *baneado*.`,
+      text: fase,
       mentions: [target]
     }, { quoted: msg });
-  } else {
-    await conn.sendMessage(chatId, {
-      text: "⚠️ Este usuario ya está baneado.",
-      mentions: [target]
-    }, { quoted: msg });
+    await new Promise(res => setTimeout(res, 1000)); // 1 segundo entre fases
   }
 };
 
-handler.command = ["ban"];
+handler.command = ["hackear", "asustar"];
 module.exports = handler;
