@@ -109,10 +109,11 @@ const handler = async (msg, { conn, args }) => {
   fs.writeFileSync(KISS_PATH, JSON.stringify(data, null, 2));
 
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
-  const numero2 = `+${targetID.replace(/@.+/, "")}`;
-  const texto = textos[Math.floor(Math.random() * textos.length)]
+  const numeroReal = `+${targetNum}`;
+  let texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
-    .replace("@2", numero2);
+    .replace("@2", `@${targetNum}`);
+  texto = texto.replace(`@${targetNum}`, numeroReal);
 
   await conn.sendMessage(chatId, {
     video: { url: gif },
