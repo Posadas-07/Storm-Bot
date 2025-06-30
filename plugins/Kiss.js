@@ -40,6 +40,7 @@ const handler = async (msg, { conn, args }) => {
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
+
   const isOwner = global.owner.some(([id]) => id === senderNum);
 
   // Obtener destinatario
@@ -109,11 +110,9 @@ const handler = async (msg, { conn, args }) => {
   fs.writeFileSync(KISS_PATH, JSON.stringify(data, null, 2));
 
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
-  const numeroReal = `+${targetNum}`;
-  let texto = textos[Math.floor(Math.random() * textos.length)]
+  const texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetNum}`);
-  texto = texto.replace(`@${targetNum}`, numeroReal);
 
   await conn.sendMessage(chatId, {
     video: { url: gif },
