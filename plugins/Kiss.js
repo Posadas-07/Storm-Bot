@@ -24,7 +24,7 @@ const textos = [
 const KISS_PATH = path.resolve("kiss_data.json");
 const KISS_COOLDOWN = 10 * 60 * 1000; // 10 minutos
 
-const handler = async (msg, { conn, args }) => {
+const handler = async (msg, { conn, args, isOwner }) => {
   const isGroup = msg.key.remoteJid.endsWith("@g.us");
   const chatId = msg.key.remoteJid;
 
@@ -64,19 +64,25 @@ const handler = async (msg, { conn, args }) => {
   }
 
   let data = fs.existsSync(KISS_PATH) ? JSON.parse(fs.readFileSync(KISS_PATH)) : {};
-  if (!data[chatId]) data[chatId] = { besosDados: {}, besosRecibidos: {} };
+  if (!data[chatId]) data[chatId] = { besosDados: {}, besosRecibidos: {}, cooldown: {} };
 
   const ahora = Date.now();
-  const last = data[chatId].besosDados[senderNum]?.usuarios?.[targetID]?.last || 0;
 
-  if (ahora - last < KISS_COOLDOWN) {
-    const mins = Math.ceil((KISS_COOLDOWN - (ahora - last)) / 60000);
-    return conn.sendMessage(chatId, {
-      text: `⏳ Debes esperar *${mins} minuto(s)* para volver a besar a ese usuario.`,
-      mentions: [targetID]
-    }, { quoted: msg });
+  // Si no es Owner, verificar cooldown general
+  if (!isOwner) {
+    const lastUse = data[chatId].cooldown?.[senderNum] || 0;
+    if (ahora - lastUse < KISS_COOLDOWN) {
+      const mins = Math.ceil((KISS_COOLDOWN - (ahora - lastUse)) / 60000);
+      return conn.sendMessage(chatId, {
+        text: `⏳ Solo puedes usar el comando una vez cada 10 minutos. Te faltan *${mins} minuto(s)*.`,
+        mentions: [senderID]
+      }, { quoted: msg });
+    }
+    // Actualizar cooldown
+    data[chatId].cooldown[senderNum] = ahora;
   }
 
+  // Registro de besos dados
   if (!data[chatId].besosDados[senderNum]) {
     data[chatId].besosDados[senderNum] = { total: 0, usuarios: {} };
   }
@@ -87,6 +93,7 @@ const handler = async (msg, { conn, args }) => {
   data[chatId].besosDados[senderNum].usuarios[targetID].count += 1;
   data[chatId].besosDados[senderNum].usuarios[targetID].last = ahora;
 
+  // Registro de besos recibidos
   const targetNum = targetID.split("@")[0];
   if (!data[chatId].besosRecibidos[targetNum]) {
     data[chatId].besosRecibidos[targetNum] = { total: 0, usuarios: {} };
