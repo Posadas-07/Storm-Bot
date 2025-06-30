@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const gifUrls = [
-  "https://qu.ax/GQLO.mp4" // GIF de matar
+  "https://qu.ax/GQLO.mp4"
 ];
 
 const textos = [
@@ -19,7 +19,7 @@ const textos = [
 ];
 
 const KILL_PATH = path.resolve("kill_data.json");
-const KILL_COOLDOWN = 10 * 60 * 1000; // 10 minutos
+const KILL_COOLDOWN = 10 * 60 * 1000;
 
 const handler = async (msg, { conn, args }) => {
   const isGroup = msg.key.remoteJid.endsWith("@g.us");
@@ -98,8 +98,8 @@ const handler = async (msg, { conn, args }) => {
 
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textos[Math.floor(Math.random() * textos.length)]
-    .replace("@1", `@${senderNum}`)
-    .replace("@2", `@${targetNum}`);
+    .replace("@1", `@+${senderNum}`)
+    .replace("@2", `@+${targetNum}`);
 
   await conn.sendMessage(chatId, {
     video: { url: gif },
