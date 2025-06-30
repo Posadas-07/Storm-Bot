@@ -1,12 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios");
 
 const gifUrls = [
-  "https://cdn.russellxz.click/5b056a4b.mp4",
-  "https://cdn.russellxz.click/5c5a4f5c.mp4",
-  "https://cdn.russellxz.click/f70fb41b.mp4",
-  "https://cdn.russellxz.click/45e2ec30.mp4"
+  "https://media.tenor.com/1YVQejKn_b4AAAAC/anime-kiss.gif",
+  "https://media.tenor.com/Jl5TUkbldSgAAAAC/kiss-anime.gif",
+  "https://media.tenor.com/qQ1zLi5nms8AAAAC/kiss-anime-couple.gif"
 ];
 
 const textos = [
@@ -14,34 +12,27 @@ const textos = [
   "😍 @1 le plantó un beso intenso a @2 💕",
   "😘 @1 no resistió y besó a @2 💖",
   "🔥 @1 y @2 se dieron un beso ardiente 💦",
-  "💘 @1 besó con ternura a @2 😚",
-  "💞 @1 no dudó y besó a @2 bajo la luna 🌙",
-  "😳 @1 robó un beso a @2 💫",
-  "🥵 @1 no aguantó las ganas y besó a @2 😍",
-  "👄 @1 y @2 se dieron un beso inolvidable ✨",
-  "❤️ @1 besó a @2 como en una novela romántica 📖"
+  "💘 @1 besó con ternura a @2 😚"
 ];
 
 const KISS_PATH = path.resolve("kiss_data.json");
-const KISS_COOLDOWN = 10 * 60 * 1000; // 10 minutos
+const KISS_COOLDOWN = 10 * 60 * 1000;
 
 const handler = async (msg, { conn, args, isOwner }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
 
   if (!isGroup) {
-    return conn.sendMessage(chatId, { text: "⚠️ Este comando solo se puede usar en grupos." }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "⚠️ Solo en grupos." }, { quoted: msg });
   }
 
   await conn.sendMessage(chatId, { react: { text: "💋", key: msg.key } });
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
-
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
 
-  // 🔄 Detección completa del objetivo
   if (ctx?.participant) {
     targetID = ctx.participant;
   } else if (ctx?.mentionedJid?.length) {
@@ -52,7 +43,7 @@ const handler = async (msg, { conn, args, isOwner }) => {
   }
 
   if (!targetID) {
-    return conn.sendMessage(chatId, { text: "❗ Menciona a alguien o responde su mensaje para besarlo 💋." }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "❗ Menciona o responde a alguien para besarlo 💋" }, { quoted: msg });
   }
 
   if (targetID === senderID) {
@@ -69,7 +60,7 @@ const handler = async (msg, { conn, args, isOwner }) => {
     if (ahora - lastUse < KISS_COOLDOWN) {
       const mins = Math.ceil((KISS_COOLDOWN - (ahora - lastUse)) / 60000);
       return conn.sendMessage(chatId, {
-        text: `⏳ Espera *${mins} minuto(s)* antes de volver a usar el comando.`,
+        text: `⏳ Espera *${mins} minuto(s)* para volver a besar.`,
         mentions: [senderID]
       }, { quoted: msg });
     }
@@ -104,24 +95,11 @@ const handler = async (msg, { conn, args, isOwner }) => {
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetNum}`);
 
-  try {
-    const response = await axios.get(gif, { responseType: "arraybuffer" });
-    const buffer = Buffer.from(response.data, "binary");
-
-    await conn.sendMessage(chatId, {
-      video: buffer,
-      gifPlayback: true,
-      caption: texto,
-      mentions: [senderID, targetID]
-    }, { quoted: msg });
-
-  } catch (error) {
-    console.error("❌ Error al enviar el video:", error.message);
-    await conn.sendMessage(chatId, {
-      text: "❌ Error al cargar el beso. Intenta de nuevo.",
-      mentions: [senderID]
-    }, { quoted: msg });
-  }
+  await conn.sendMessage(chatId, {
+    image: { url: gif },
+    caption: texto,
+    mentions: [senderID, targetID]
+  }, { quoted: msg });
 };
 
 handler.command = ["kiss"];
