@@ -1,5 +1,3 @@
-const { delay } = require("@adiwajshing/baileys"); // Asegúrate de tener esta función o crea tu propio delay
-
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
@@ -7,9 +5,17 @@ const handler = async (msg, { conn }) => {
   const isGroup = chatId.endsWith("@g.us");
   const isOwner = global.owner.some(([id]) => id === senderNum);
 
-  if (!isOwner) {
+  if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "❌ Solo el *dueño del bot* puede usar este comando."
+      text: "❌ Este comando solo puede usarse en grupos."
+    }, { quoted: msg });
+  }
+
+  const metadata = await conn.groupMetadata(chatId);
+  const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
+  if (!isAdmin && !isOwner) {
+    return conn.sendMessage(chatId, {
+      text: "❌ Solo *admins* o el *dueño* del bot pueden usar este comando."
     }, { quoted: msg });
   }
 
@@ -18,7 +24,7 @@ const handler = async (msg, { conn }) => {
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "⚠️ Responde al mensaje del usuario que quieres asustar."
+      text: "⚠️ Responde al mensaje del usuario que quieres hackear (broma)."
     }, { quoted: msg });
   }
 
@@ -29,39 +35,26 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  // Crear barra de progreso
-  const crearBarra = (porcentaje) => {
-    const total = 20;
-    const llenos = Math.floor((porcentaje / 100) * total);
-    const vacíos = total - llenos;
-    return `[${'█'.repeat(llenos)}${'░'.repeat(vacíos)}] ${porcentaje}%`;
-  };
+  const fases = [
+    `🔍 Iniciando escaneo de WhatsApp de @${targetNum}...`,
+    `📡 Localizando mensajes en la nube...`,
+    `📥 Extrayendo stickers, notas de voz y estados...`,
+    `🔐 Descifrando cifrado de extremo a extremo...`,
+    `📲 Clonando WhatsApp...`,
+    `⚠️ Infección de datos en proceso...`,
+    `🧠 Accediendo a memoria interna...`,
+    `🚫 Eliminando privacidad...`,
+    `✅ Hackeo completo: WhatsApp de @${targetNum} ha sido comprometido.`,
+    `😱 *Broma completada con éxito.*`
+  ];
 
-  let porcentaje = 0;
-  const mensajeInicial = await conn.sendMessage(chatId, {
-    text: `🛠️ Hackeando WhatsApp de @${targetNum}...\n${crearBarra(porcentaje)}`,
+  const textoFinal = fases.join('\n');
+
+  await conn.sendMessage(chatId, {
+    text: textoFinal,
     mentions: [target]
   }, { quoted: msg });
-
-  while (porcentaje < 100) {
-    porcentaje += 5;
-    await delay(500); // medio segundo entre actualizaciones
-
-    await conn.sendMessage(chatId, {
-      edit: mensajeInicial.key,
-      text: `🛠️ Hackeando WhatsApp de @${targetNum}...\n${crearBarra(porcentaje)}`,
-      mentions: [target]
-    });
-  }
-
-  // Finalizar
-  await delay(800);
-  await conn.sendMessage(chatId, {
-    edit: mensajeInicial.key,
-    text: `✅ Hackeo completo. WhatsApp de @${targetNum} ha sido comprometido... era *broma* 😄`,
-    mentions: [target]
-  });
 };
 
-handler.command = ["asustar", "hackear"];
+handler.command = ["hackear", "asustar"];
 module.exports = handler;
