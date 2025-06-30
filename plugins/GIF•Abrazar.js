@@ -1,20 +1,8 @@
-const videos = [
-  'https://telegra.ph/file/6a3aa01fabb95e3558eec.mp4',
-  'https://telegra.ph/file/0e5b24907be34da0cbe84.mp4',
-  'https://telegra.ph/file/6bc3cd10684f036e541ed.mp4',
-  'https://telegra.ph/file/3e443a3363a90906220d8.mp4',
-  'https://telegra.ph/file/56d886660696365f9696b.mp4',
-  'https://telegra.ph/file/3eeadd9d69653803b33c6.mp4',
-  'https://telegra.ph/file/436624e53c5f041bfd597.mp4',
-  'https://telegra.ph/file/5866f0929bf0c8fe6a909.mp4'
-];
-
+// 🔱 Comando personalizado ABRAZAR - estilo Killua Bot
 module.exports = async (msg, { conn }) => {
-  let who = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
-
-  let name2 = msg.pushName || msg.sender;
-  let contact = await conn.onWhatsApp(who);
-  let name = contact?.[0]?.notify || who;
+  const who = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
+  const name2 = msg.pushName || msg.sender;
+  const name = (await conn.onWhatsApp(who))[0]?.notify || who;
 
   await conn.sendMessage(msg.chat, {
     react: {
@@ -32,17 +20,17 @@ module.exports = async (msg, { conn }) => {
     texto = `*${name2}* se abrazó a sí mismo 🥺`;
   }
 
-  const video = videos[Math.floor(Math.random() * videos.length)];
+  const gif = 'https://cdn.russellxz.click/c6ea097b.mp4'; // 👈 Aquí tú pones el enlace del gif
 
   await conn.sendMessage(msg.chat, {
-    video: { url: video },
+    video: { url: gif },
     gifPlayback: true,
     caption: texto,
     mentions: [who]
   }, { quoted: msg });
 };
 
-module.exports.command = ['hug', 'abrazar'];
-module.exports.tags = ['anime'];
-module.exports.help = ['hug @tag', 'abrazar @tag'];
+module.exports.command = ['abrazar'];
+module.exports.tags = ['gif'];
+module.exports.help = ['abrazar @tag'];
 module.exports.group = true;
