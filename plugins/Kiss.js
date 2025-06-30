@@ -41,6 +41,8 @@ const handler = async (msg, { conn, args }) => {
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
 
+  const isOwner = global.owner.some(([id]) => id === senderNum);
+
   // Obtener destinatario
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
@@ -71,7 +73,7 @@ const handler = async (msg, { conn, args }) => {
   const ahora = Date.now();
   const last = data.cooldown[senderNum] || 0;
 
-  if (ahora - last < KISS_COOLDOWN) {
+  if (!isOwner && ahora - last < KISS_COOLDOWN) {
     const mins = Math.ceil((KISS_COOLDOWN - (ahora - last)) / 60000);
     return conn.sendMessage(chatId, {
       text: `⏳ Espera *${mins} minuto(s)* para volver a usar el comando.`,
@@ -79,8 +81,9 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Registrar cooldown global del usuario
-  data.cooldown[senderNum] = ahora;
+  if (!isOwner) {
+    data.cooldown[senderNum] = ahora;
+  }
 
   // Guardar besos dados
   if (!data[chatId].besosDados[senderNum]) {
