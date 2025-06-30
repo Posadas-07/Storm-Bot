@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios"); // 👈 importante
+const axios = require("axios");
 
 const gifUrls = [
   "https://cdn.russellxz.click/5b056a4b.mp4",
@@ -23,21 +23,20 @@ const textos = [
 ];
 
 const KISS_PATH = path.resolve("kiss_data.json");
-const KISS_COOLDOWN = 10 * 60 * 1000; // 10 minutos
+const KISS_COOLDOWN = 10 * 60 * 1000;
 
 const handler = async (msg, { conn, args, isOwner }) => {
-  const isGroup = msg.key.remoteJid.endsWith("@g.us");
   const chatId = msg.key.remoteJid;
+  const isGroup = chatId.endsWith("@g.us");
 
   if (!isGroup) {
-    return conn.sendMessage(chatId, {
-      text: "⚠️ Este comando solo se puede usar en grupos."
-    }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "⚠️ Solo funciona en grupos." }, { quoted: msg });
   }
 
-  await conn.sendMessage(chatId, {
-    react: { text: "💋", key: msg.key }
-  });
+  await conn.sendMessage(chatId, { react: { text: "💋", key: msg.key } });
+
+  // ⚠️ DEBUG 1
+  await conn.sendMessage(chatId, { text: "✅ Paso 1: Mensaje recibido", quoted: msg });
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
@@ -53,15 +52,11 @@ const handler = async (msg, { conn, args, isOwner }) => {
   }
 
   if (!targetID) {
-    return conn.sendMessage(chatId, {
-      text: "💡 Responde al mensaje o menciona a alguien para besarlo 💋"
-    }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "❗ Menciona a alguien o responde su mensaje.", quoted: msg });
   }
 
   if (targetID === senderID) {
-    return conn.sendMessage(chatId, {
-      text: "😅 No puedes besarte a ti mismo..."
-    }, { quoted: msg });
+    return conn.sendMessage(chatId, { text: "😅 No puedes besarte a ti mismo.", quoted: msg });
   }
 
   let data = fs.existsSync(KISS_PATH) ? JSON.parse(fs.readFileSync(KISS_PATH)) : {};
@@ -74,12 +69,15 @@ const handler = async (msg, { conn, args, isOwner }) => {
     if (ahora - lastUse < KISS_COOLDOWN) {
       const mins = Math.ceil((KISS_COOLDOWN - (ahora - lastUse)) / 60000);
       return conn.sendMessage(chatId, {
-        text: `⏳ Solo puedes usar el comando una vez cada *10 minutos*. Te faltan *${mins} minuto(s)*.`,
+        text: `⏳ Espera *${mins} minuto(s)* antes de usar el comando otra vez.`,
         mentions: [senderID]
       }, { quoted: msg });
     }
     data[chatId].cooldown[senderNum] = ahora;
   }
+
+  // ⚠️ DEBUG 2
+  await conn.sendMessage(chatId, { text: "✅ Paso 2: Cooldown superado", quoted: msg });
 
   if (!data[chatId].besosDados[senderNum]) {
     data[chatId].besosDados[senderNum] = { total: 0, usuarios: {} };
@@ -103,6 +101,9 @@ const handler = async (msg, { conn, args, isOwner }) => {
 
   fs.writeFileSync(KISS_PATH, JSON.stringify(data, null, 2));
 
+  // ⚠️ DEBUG 3
+  await conn.sendMessage(chatId, { text: "✅ Paso 3: Datos guardados", quoted: msg });
+
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
@@ -119,12 +120,12 @@ const handler = async (msg, { conn, args, isOwner }) => {
       mentions: [senderID, targetID]
     }, { quoted: msg });
 
-  } catch (err) {
-    console.error("❌ Error al enviar el video:", err);
+  } catch (error) {
+    console.error("❌ Error al enviar el video:", error.message);
     await conn.sendMessage(chatId, {
-      text: "❌ Ocurrió un error al cargar el beso, intenta nuevamente más tarde.",
-      mentions: [senderID]
-    }, { quoted: msg });
+      text: "❌ Error al cargar el beso. Verifica la conexión o el enlace.",
+      quoted: msg
+    });
   }
 };
 
