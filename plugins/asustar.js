@@ -5,8 +5,6 @@ module.exports = {
 
   async execute(sock, m, args) {
     try {
-      console.log('Comando asustar ejecutado'); // Verificación en consola
-
       const nombreVictima = args.join(' ') || 'la víctima';
 
       const fases = [
@@ -24,12 +22,12 @@ module.exports = {
       ];
 
       for (let fase of fases) {
-        await sock.sendMessage(m.chat, { text: fase }, { quoted: m });
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
+        await sock.sendMessage(m.key.remoteJid, { text: fase }, { quoted: m });
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } catch (error) {
-      console.error('Error en el comando asustar:', error);
-      await sock.sendMessage(m.chat, { text: '❌ Hubo un error al ejecutar el comando.' }, { quoted: m });
+      console.error('❌ Error en el comando asustar:', error);
+      await sock.sendMessage(m.key.remoteJid, { text: '❌ Hubo un error al ejecutar el comando.' }, { quoted: m });
     }
   }
 };
