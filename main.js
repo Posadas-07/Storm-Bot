@@ -14102,9 +14102,9 @@ case "perfil": {
 }
 
 case 'creador': {
-    const ownerNumber = "15167096032@s.whatsapp.net"; // Número del dueño en formato WhatsApp
-    const ownerName = "Russell xz 🤖"; // Nombre del dueño
-    const messageText = "📞 *Contacto del Creador:*\n\nSi tienes dudas, preguntas o sugerencias sobre el bot, puedes contactar a mi creador.\n\n📌 *Nombre:* Russell\n📌 *Número:* +1 (516) 709-6032\n💬 *Mensaje directo:* Pulsa sobre el contacto y chatea con él.";
+    const ownerNumber = "50496176060@s.whatsapp.net"; // Número del dueño en formato WhatsApp
+    const ownerName = "Storm"; // Nombre del dueño
+    const messageText = "📞 *Hols soy Storm!.";
 
     // Enviar mensaje con el contacto del dueño
     await sock.sendMessage(msg.key.remoteJid, {
