@@ -1,28 +1,30 @@
 const fs = require("fs");
 const path = require("path");
 
+// 🔧 Aquí pones tus GIFs de abrazos (pueden ser .mp4)
 const gifUrls = [
-  "https://cdn.russellxz.click/5b056a4b.mp4",
-  "https://cdn.russellxz.click/5c5a4f5c.mp4",
-  "https://cdn.russellxz.click/f70fb41b.mp4",
-  "https://cdn.russellxz.click/45e2ec30.mp4"
+  "https://cdn.russellxz.click/c6ea097b.mp4",
+  "URL_DEL_GIF_2",
+  "URL_DEL_GIF_3"
 ];
 
+// Frases personalizadas de abrazos
 const textos = [
-  "💋 *@1 besó apasionadamente a @2* 😳",
-  "😍 *@1 le plantó un beso intenso a @2* 💕",
-  "😘 *@1 no resistió y besó a @2* 💖",
-  "🔥 *@1 y @2 se dieron un beso ardiente* 💦",
-  "💘 *@1 besó con ternura a @2* 😚",
-  "💞 *@1 no dudó y besó a @2 bajo la luna* 🌙",
-  "😳 *@1 robó un beso a @2* 💫",
-  "🥵 *@1 no aguantó las ganas y besó a @2* 😍",
-  "👄 *@1 y @2 se dieron un beso inolvidable* ✨",
-  "❤️ *@1 besó a @2 como en una novela romántica* 📖"
+  "🫂 *@1 abrazó tiernamente a @2* 💖",
+  "💞 *@1 le dio un fuerte abrazo a @2* 🤗",
+  "😍 *@1 se lanzó a abrazar a @2 sin pensarlo* 🤍",
+  "😳 *@1 abrazó con fuerza a @2* 💕",
+  "🤍 *@1 y @2 compartieron un cálido abrazo* 🫂",
+  "🌙 *@1 abrazó a @2 bajo la luna* ✨",
+  "🥹 *@1 corrió y abrazó a @2 con emoción* 💫",
+  "❤️ *@1 abrazó a @2 como si no hubiera un mañana* 🌟",
+  "😚 *@1 abrazó dulcemente a @2* 🧸",
+  "✨ *@1 y @2 se abrazaron con cariño* 💞"
 ];
 
-const KISS_PATH = path.resolve("kiss_data.json");
-const KISS_COOLDOWN = 10 * 60 * 1000; // 10 minutos
+// Ruta para guardar estadísticas
+const HUG_PATH = path.resolve("hug_data.json");
+const HUG_COOLDOWN = 10 * 60 * 1000; // 10 minutos
 
 const handler = async (msg, { conn, args }) => {
   const isGroup = msg.key.remoteJid.endsWith("@g.us");
@@ -34,15 +36,13 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Reacción inicial
   await conn.sendMessage(chatId, {
-    react: { text: "💋", key: msg.key }
+    react: { text: "🤗", key: msg.key }
   });
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
 
-  // Obtener destinatario: citado o mencionado
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
 
@@ -55,55 +55,52 @@ const handler = async (msg, { conn, args }) => {
 
   if (!targetID) {
     return conn.sendMessage(chatId, {
-      text: "💡 Responde al mensaje o menciona a alguien para besarlo 💋"
+      text: "💡 Responde al mensaje o menciona a alguien para abrazarlo 🫂"
     }, { quoted: msg });
   }
 
   if (targetID === senderID) {
     return conn.sendMessage(chatId, {
-      text: "😅 No puedes besarte a ti mismo..."
+      text: "😅 No puedes abrazarte a ti mismo..."
     }, { quoted: msg });
   }
 
-  let data = fs.existsSync(KISS_PATH) ? JSON.parse(fs.readFileSync(KISS_PATH)) : {};
-  if (!data[chatId]) data[chatId] = { besosDados: {}, besosRecibidos: {} };
+  let data = fs.existsSync(HUG_PATH) ? JSON.parse(fs.readFileSync(HUG_PATH)) : {};
+  if (!data[chatId]) data[chatId] = { abrazosDados: {}, abrazosRecibidos: {} };
 
   const ahora = Date.now();
-  const last = data[chatId].besosDados[senderNum]?.usuarios?.[targetID]?.last || 0;
+  const last = data[chatId].abrazosDados[senderNum]?.usuarios?.[targetID]?.last || 0;
 
-  if (ahora - last < KISS_COOLDOWN) {
-    const mins = Math.ceil((KISS_COOLDOWN - (ahora - last)) / 60000);
+  if (ahora - last < HUG_COOLDOWN) {
+    const mins = Math.ceil((HUG_COOLDOWN - (ahora - last)) / 60000);
     return conn.sendMessage(chatId, {
-      text: `⏳ Debes esperar *${mins} minuto(s)* para volver a besar a ese usuario.`,
+      text: `⏳ Debes esperar *${mins} minuto(s)* para volver a abrazar a ese usuario.`,
       mentions: [targetID]
     }, { quoted: msg });
   }
 
-  // Guardar besos dados
-  if (!data[chatId].besosDados[senderNum]) {
-    data[chatId].besosDados[senderNum] = { total: 0, usuarios: {} };
+  if (!data[chatId].abrazosDados[senderNum]) {
+    data[chatId].abrazosDados[senderNum] = { total: 0, usuarios: {} };
   }
-  if (!data[chatId].besosDados[senderNum].usuarios[targetID]) {
-    data[chatId].besosDados[senderNum].usuarios[targetID] = { count: 0, last: 0 };
+  if (!data[chatId].abrazosDados[senderNum].usuarios[targetID]) {
+    data[chatId].abrazosDados[senderNum].usuarios[targetID] = { count: 0, last: 0 };
   }
-  data[chatId].besosDados[senderNum].total += 1;
-  data[chatId].besosDados[senderNum].usuarios[targetID].count += 1;
-  data[chatId].besosDados[senderNum].usuarios[targetID].last = ahora;
+  data[chatId].abrazosDados[senderNum].total += 1;
+  data[chatId].abrazosDados[senderNum].usuarios[targetID].count += 1;
+  data[chatId].abrazosDados[senderNum].usuarios[targetID].last = ahora;
 
-  // Guardar besos recibidos
   const targetNum = targetID.split("@")[0];
-  if (!data[chatId].besosRecibidos[targetNum]) {
-    data[chatId].besosRecibidos[targetNum] = { total: 0, usuarios: {} };
+  if (!data[chatId].abrazosRecibidos[targetNum]) {
+    data[chatId].abrazosRecibidos[targetNum] = { total: 0, usuarios: {} };
   }
-  if (!data[chatId].besosRecibidos[targetNum].usuarios[senderNum]) {
-    data[chatId].besosRecibidos[targetNum].usuarios[senderNum] = 0;
+  if (!data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum]) {
+    data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum] = 0;
   }
-  data[chatId].besosRecibidos[targetNum].total += 1;
-  data[chatId].besosRecibidos[targetNum].usuarios[senderNum] += 1;
+  data[chatId].abrazosRecibidos[targetNum].total += 1;
+  data[chatId].abrazosRecibidos[targetNum].usuarios[senderNum] += 1;
 
-  fs.writeFileSync(KISS_PATH, JSON.stringify(data, null, 2));
+  fs.writeFileSync(HUG_PATH, JSON.stringify(data, null, 2));
 
-  // GIF y mensaje aleatorio
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
@@ -117,5 +114,5 @@ const handler = async (msg, { conn, args }) => {
   }, { quoted: msg });
 };
 
-handler.command = ["kiss"];
+handler.command = ["abrazar"];
 module.exports = handler;
