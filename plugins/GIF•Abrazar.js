@@ -1,4 +1,3 @@
-// 🔱 Plugin reparado 100% para estilo Killua Bot
 const videos = [
   'https://telegra.ph/file/6a3aa01fabb95e3558eec.mp4',
   'https://telegra.ph/file/0e5b24907be34da0cbe84.mp4',
@@ -13,10 +12,10 @@ const videos = [
 module.exports = async (msg, { conn }) => {
   let who = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
 
-  let name = await conn.getName(who, msg).catch(() => who);
-  let name2 = await conn.getName(msg.sender, msg).catch(() => msg.sender);
+  let name2 = msg.pushName || msg.sender;
+  let contact = await conn.onWhatsApp(who);
+  let name = contact?.[0]?.notify || who;
 
-  // Reacciona con emoji
   await conn.sendMessage(msg.chat, {
     react: {
       text: '🤗',
