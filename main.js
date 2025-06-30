@@ -3589,10 +3589,21 @@ await sock.sendMessage2(
     );
   }
   break;
-}        
+} 
+        
 case 'menu': {
   try {
-    // Reacción inicial (se mantiene sendMessage normal)
+    const senderId = msg.key.participant || msg.key.remoteJid;
+    const senderNum = senderId.replace(/[^0-9]/g, "");
+    const isOwner = global.owner.some(([id]) => id === senderNum);
+
+    if (!isOwner) {
+      await sock.sendMessage(msg.key.remoteJid, {
+        text: '⛔ *Este comando solo puede ser usado por el OWNER del bot.*'
+      }, { quoted: msg });
+      return;
+    }
+
     await sock.sendMessage(msg.key.remoteJid, {
       react: { text: "📜", key: msg.key }
     });
@@ -3740,6 +3751,11 @@ case 'menu': {
 │ ✦ 𝙈𝙄𝙉𝙄 𝙅𝙐𝙀𝙂𝙊𝙎 ✦ │  
 ╰──────────────╯  
 ⎔ ${global.prefix}verdad  
+⎔ ${global.prefix}kiss
+⎔ ${global.prefix}abrazar 
+⎔ ${global.prefix}matar
+⎔ ${global.prefix}hackear 
+⎔ ${global.prefix} asustar 
 ⎔ ${global.prefix}reto  
 ⎔ ${global.prefix}personalidad  
 ⎔ ${global.prefix}ship  
@@ -3758,15 +3774,18 @@ case 'menu': {
 
 👨‍💻 𝘿𝙚𝙨𝙖𝙧𝙧𝙤𝙡𝙡𝙖𝙙𝙤 𝙥𝙤𝙧 Storm`;
 
-    // Enviar usando sendMessage2
+    const gifUrl = "https://cdn.russellxz.click/05e0594b.mp4";
+
     await sock.sendMessage2(
-  chatId,
-  {
-    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
-    caption: captionText 
-  },
-  msg 
-)
+      chatId,
+      {
+        video: { url: gifUrl },
+        caption: captionText,
+        gifPlayback: true,
+        mimetype: 'video/mp4'
+      },
+      msg
+    );
 
   } catch (error) {
     console.error("Error en comando menu:", error);
@@ -3777,7 +3796,8 @@ case 'menu': {
     );
   }
   break;
-}
+}  
+
 case 'menugrupo': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
