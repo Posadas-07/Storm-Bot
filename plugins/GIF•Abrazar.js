@@ -1,8 +1,7 @@
-// 🔱 Comando ABRAZAR desde cero – estilo Killua sin errores
+// 🔱 Comando ABRAZAR desde cero – sin errores y estilo Killua
 module.exports = async (msg, { conn }) => {
-  let who = msg.mentionedJid?.[0] || msg.quoted?.sender || msg.sender;
-  let nombreQuienManda = msg.pushName || 'Alguien';
-  let nombreObjetivo = who.split('@')[0]; // Solo número sin @s.whatsapp.net
+  const quienManda = msg.pushName || 'Alguien';
+  const quienRecibe = msg.mentionedJid?.[0] || msg.quoted?.sender;
 
   // Emoji de reacción
   await conn.sendMessage(msg.chat, {
@@ -12,22 +11,23 @@ module.exports = async (msg, { conn }) => {
     }
   });
 
-  // Mensaje de abrazo
-  let texto;
-  if (msg.mentionedJid?.length || msg.quoted) {
-    texto = `*${nombreQuienManda}* le dio un fuerte abrazo a *@${nombreObjetivo}* 🫂`;
+  // Mensaje de respuesta
+  let texto = '';
+  if (quienRecibe) {
+    const id = quienRecibe.split('@')[0];
+    texto = `*${quienManda}* le dio un fuerte abrazo a *@${id}* 🫂`;
   } else {
-    texto = `*${nombreQuienManda}* se abrazó a sí mismo 🥺`;
+    texto = `*${quienManda}* se abrazó a sí mismo 🥺`;
   }
 
-  // Aquí tú colocas tu URL de gif personalizado
-  let gifUrl = 'https://cdn.russellxz.click/c6ea097b.mp4'; // 🔧 CAMBIA ESTO
+  // Coloca aquí tu gif personalizado
+  const gif = 'URL_DEL_GIF'; // 🔧 REEMPLÁZALO CON TU GIF
 
   await conn.sendMessage(msg.chat, {
-    video: { url: gifUrl },
+    video: { url: gif },
     gifPlayback: true,
     caption: texto,
-    mentions: [who]
+    mentions: quienRecibe ? [quienRecibe] : []
   }, { quoted: msg });
 };
 
