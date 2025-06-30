@@ -3426,7 +3426,6 @@ case 'allmenu': {
     }
     break;
 }
-  const axios = require("axios");
 
 case 'menuowner': {
   try {
@@ -3793,8 +3792,6 @@ case 'menu': {
   }
   break;
 }  
-
-  const axios = require("axios");
 
 case 'menugrupo': {
   try {
