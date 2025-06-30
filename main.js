@@ -3426,6 +3426,8 @@ case 'allmenu': {
     }
     break;
 }
+  const axios = require("axios");
+
 case 'menuowner': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
@@ -3433,6 +3435,7 @@ case 'menuowner': {
     });
 
     const chatId = msg.key.remoteJid;
+
     const captionText = `╔═══════════╗  
 ║    STORM     
 ╚═══════════╝  
@@ -3469,31 +3472,24 @@ case 'menuowner': {
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯  
 
-      𝗗𝗲𝘀𝗮𝗿𝗿𝗼𝗹𝗹𝗮𝗱𝗼 𝗽𝗼𝗿: ʳᵘˢˢᵉˡˡ ˣᶻ  
+      𝗗𝗲𝘀𝗮𝗿𝗿𝗼𝗹𝗹𝗮𝗱𝗼 𝗽𝗼𝗿: Storm 
 
          STORM`;
 
-    const videoResponse = await axios.get(
-      "https://cdn.russellxz.click/83229a2d.jpeg",
-      { responseType: 'arraybuffer' }
-    );
+    // Link al GIF animado en formato MP4
+    const gifUrl = "https://cdn.russellxz.click/de2f6d48.mp4"; // Cámbialo por el tuyo si quieres
 
-await sock.sendMessage2(
-  chatId,
-  {
-    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
-    caption: captionText 
-  },
-  msg 
-);
+    await sock.sendMessage(chatId, {
+      video: { url: gifUrl },
+      caption: captionText,
+      gifPlayback: true
+    }, { quoted: msg });
 
   } catch (error) {
     console.error("Error en menuowner:", error);
-    await sock.sendMessage2(
-      msg.key.remoteJid,
-      "❌ Ocurrió un error al mostrar el menú Owner",
-      msg
-    );
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ Ocurrió un error al mostrar el menú Owner"
+    }, { quoted: msg });
   }
   break;
 }
@@ -3798,6 +3794,8 @@ case 'menu': {
   break;
 }  
 
+  const axios = require("axios");
+
 case 'menugrupo': {
   try {
     await sock.sendMessage(msg.key.remoteJid, {
@@ -3805,6 +3803,7 @@ case 'menugrupo': {
     });
 
     const chatId = msg.key.remoteJid;
+
     const captionText = `╔════════════════╗  
 ║    STORM             
 ║   🎭 𝙼𝙴𝙽𝚄 𝙳𝙴 𝙶ℝ𝚄𝙿𝙾 🎭    
@@ -3861,26 +3860,20 @@ case 'menugrupo': {
 
 ⟢ STORM ⟣`;
 
-    const videoResponse = await axios.get("https://cdn.russellxz.click/c113150e.jpeg", { 
-      responseType: 'arraybuffer' 
-    });
+    // Puedes cambiar este link por cualquier GIF en formato .mp4
+    const gifUrl = "https://cdn.russellxz.click/4ebd26ae.mp4";
 
-    await sock.sendMessage2(
-  chatId,
-  {
-    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
-    caption: captionText 
-  },
-  msg
-)
+    await sock.sendMessage(chatId, {
+      video: { url: gifUrl },
+      caption: captionText,
+      gifPlayback: true
+    }, { quoted: msg });
 
   } catch (error) {
     console.error("Error en menugrupo:", error);
-    await sock.sendMessage2(
-      msg.key.remoteJid,
-      "❌ Ocurrió un error al mostrar el menú de grupo",
-      msg
-    );
+    await sock.sendMessage(msg.key.remoteJid, {
+      text: "❌ Ocurrió un error al mostrar el menú de grupo."
+    }, { quoted: msg });
   }
   break;
 }
