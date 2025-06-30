@@ -58,7 +58,7 @@ const handler = async (msg, { conn }) => {
 
   // Descargar y enviar audio desde URL
   try {
-    const audioUrl = "https://cdn.russellxz.click/6aa6ba79.mp3";
+    const audioUrl = "https://cdn.russellxz.click/f9c1cecf.mp4";
     const response = await axios.get(audioUrl, { responseType: 'arraybuffer' });
 
     await conn.sendMessage(chatId, {
