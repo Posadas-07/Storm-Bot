@@ -6,7 +6,6 @@ const handler = async (msg, { conn }) => {
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
-  // Solo dueño
   const isOwner = global.owner.some(([id]) => id === senderNum);
   if (!isOwner) {
     return conn.sendMessage(chatId, {
@@ -50,25 +49,25 @@ const handler = async (msg, { conn }) => {
 😈 *Todo fue una broma. No llores.*
 `;
 
-  // Enviar mensaje con mención
   await conn.sendMessage(chatId, {
     text: mensajeHack,
     mentions: [target]
   }, { quoted: msg });
 
-  // Descargar y enviar audio desde URL
+  // 🔗 URL del video (puedes cambiar esta URL)
+  const videoUrl = "https://cdn.russellxz.click/f9c1cecf.mp4";
+
   try {
-    const audioUrl = "https://cdn.russellxz.click/f9c1cecf.mp4";
-    const response = await axios.get(audioUrl, { responseType: 'arraybuffer' });
+    const response = await axios.get(videoUrl, { responseType: 'arraybuffer' });
 
     await conn.sendMessage(chatId, {
-      audio: Buffer.from(response.data),
-      mimetype: 'audio/mp4',
-      ptt: true
+      video: Buffer.from(response.data),
+      mimetype: 'video/mp4',
+      caption: "🎥 *Reacción del hackeo exitoso* 😈"
     }, { quoted: msg });
-  } catch (e) {
+  } catch (error) {
     await conn.sendMessage(chatId, {
-      text: "⚠️ Ocurrió un error al enviar el audio. Verifica que la URL esté activa."
+      text: "⚠️ No se pudo enviar el video. Verifica que el enlace esté activo y sea un `.mp4` válido.",
     }, { quoted: msg });
   }
 };
