@@ -3,19 +3,18 @@ const handler = async (msg, { conn }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const isOwner = global.owner.some(([id]) => id === senderNum);
 
-  if (!isGroup) {
+  // Verificar si es el dueño
+  const isOwner = global.owner.some(([id]) => id === senderNum);
+  if (!isOwner) {
     return conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarse en grupos."
+      text: "⛔ *Acceso denegado*\nEste comando solo está disponible para el *dueño del bot*.",
     }, { quoted: msg });
   }
 
-  const metadata = await conn.groupMetadata(chatId);
-  const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-  if (!isAdmin && !isOwner) {
+  if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "❌ Solo *admins* o el *dueño* del bot pueden usar este comando."
+      text: "👥 Este comando solo se puede usar en grupos.",
     }, { quoted: msg });
   }
 
@@ -24,34 +23,34 @@ const handler = async (msg, { conn }) => {
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "⚠️ Responde al mensaje del usuario que quieres hackear (broma)."
+      text: "❗ Responde al mensaje del usuario que deseas *hackear* (broma).",
     }, { quoted: msg });
   }
 
   const targetNum = target.replace(/[^0-9]/g, "");
   if (global.owner.some(([id]) => id === targetNum)) {
     return conn.sendMessage(chatId, {
-      text: "❌ No puedes hackear al *dueño del bot*."
+      text: "🛡️ No puedes hackear al *dueño del bot*.",
     }, { quoted: msg });
   }
 
-  const fases = [
-    `🔍 Iniciando escaneo de WhatsApp de @${targetNum}...`,
-    `📡 Localizando mensajes en la nube...`,
-    `📥 Extrayendo stickers, notas de voz y estados...`,
-    `🔐 Descifrando cifrado de extremo a extremo...`,
-    `📲 Clonando WhatsApp...`,
-    `⚠️ Infección de datos en proceso...`,
-    `🧠 Accediendo a memoria interna...`,
-    `🚫 Eliminando privacidad...`,
-    `✅ Hackeo completo: WhatsApp de @${targetNum} ha sido comprometido.`,
-    `😱 *Broma completada con éxito.*`
-  ];
-
-  const textoFinal = fases.join('\n');
+  // Mensaje final con diseño
+  const mensajeHack = `
+╭━━━[ *INICIANDO ATAQUE* ]━━━╮
+┃ 👤 Objetivo: @${targetNum}
+┃ 🌐 Escaneo de red...
+┃ 📡 Clonando base de datos...
+┃ 🔍 Revisando chats y stickers...
+┃ 🧠 Acceso a memoria interna...
+┃ 💾 Extrayendo multimedia...
+┃ 🛑 Borrando privacidad...
+┃ ✅ *Hackeo completado con éxito*
+╰━━━━━━━━━━━━━━━━━━━━━━━╯
+😈 *Todo fue una broma. No llores.*
+`;
 
   await conn.sendMessage(chatId, {
-    text: textoFinal,
+    text: mensajeHack,
     mentions: [target]
   }, { quoted: msg });
 };
