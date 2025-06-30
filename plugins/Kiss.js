@@ -68,17 +68,16 @@ const handler = async (msg, { conn, args, isOwner }) => {
 
   const ahora = Date.now();
 
-  // Si no es Owner, verificar cooldown general
+  // 🚫 Cooldown general solo si NO es owner
   if (!isOwner) {
     const lastUse = data[chatId].cooldown?.[senderNum] || 0;
     if (ahora - lastUse < KISS_COOLDOWN) {
       const mins = Math.ceil((KISS_COOLDOWN - (ahora - lastUse)) / 60000);
       return conn.sendMessage(chatId, {
-        text: `⏳ Solo puedes usar el comando una vez cada 10 minutos. Te faltan *${mins} minuto(s)*.`,
+        text: `⏳ Solo puedes usar el comando una vez cada *10 minutos*. Te faltan *${mins} minuto(s)*.`,
         mentions: [senderID]
       }, { quoted: msg });
     }
-    // Actualizar cooldown
     data[chatId].cooldown[senderNum] = ahora;
   }
 
@@ -111,8 +110,9 @@ const handler = async (msg, { conn, args, isOwner }) => {
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetNum}`);
 
+  // ✅ Envío del gif como video con gifPlayback
   await conn.sendMessage(chatId, {
-    video: { url: gif },
+    video: gif,
     gifPlayback: true,
     caption: texto,
     mentions: [senderID, targetID]
