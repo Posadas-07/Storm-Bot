@@ -4,44 +4,22 @@ const path = require("path");
 const WARN_PATH = path.resolve("warn_data.json");
 const MAX_WARNINGS = 3;
 
-const handler = async (msg, { conn, args, participants }) => {
+const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   if (!chatId.endsWith("@g.us")) return;
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
-  const botID = conn.user?.id || conn.user?.jid || "";
 
-  // ✅ Validación de admin sin .some que crashee
-  let isSenderAdmin = false;
-  let isBotAdmin = false;
-
-  if (Array.isArray(participants)) {
-    isSenderAdmin = participants.some(p => p.id === senderID && p.admin);
-    isBotAdmin = participants.some(p => p.id === botID && p.admin);
-  }
-
-  if (!isSenderAdmin) {
-    return conn.sendMessage(chatId, {
-      text: "🚫 Solo los administradores pueden usar este comando."
-    }, { quoted: msg });
-  }
-
-  if (!isBotAdmin) {
-    return conn.sendMessage(chatId, {
-      text: "🤖 El bot necesita ser administrador para poder expulsar usuarios."
-    }, { quoted: msg });
-  }
-
-  // Obtener usuario objetivo
+  // Este comando funcionará para todos (sin verificar admin)
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
 
   if (ctx?.participant) {
     targetID = ctx.participant;
   } else if (args[0]) {
-    const num = args[0].replace(/[^0-9]/g, "");
-    if (num) targetID = `${num}@s.whatsapp.net`;
+    const raw = args[0].replace(/[^0-9]/g, "");
+    if (raw) targetID = `${raw}@s.whatsapp.net`;
   }
 
   if (!targetID) {
