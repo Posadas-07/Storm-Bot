@@ -23,5 +23,5 @@ const handler = async (msg, { conn }) => {
   });
 };
 
-handler.command = ["destruccion"];
+handler.command = ["pain"];
 module.exports = handler;
