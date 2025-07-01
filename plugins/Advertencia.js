@@ -12,18 +12,18 @@ const handler = async (msg, { conn, args, participants }) => {
   const senderNum = senderID.split("@")[0];
   const botID = conn.user.jid;
 
-  const isSenderAdmin = participants.some(p => p.id === senderID && (p.admin === "admin" || p.admin === "superadmin"));
-  const isBotAdmin = participants.some(p => p.id === botID && (p.admin === "admin" || p.admin === "superadmin"));
+  const isSenderAdmin = participants.some(p => p.id === senderID && p.admin);
+  const isBotAdmin = participants.some(p => p.id === botID && p.admin);
 
   if (!isSenderAdmin) {
     return conn.sendMessage(chatId, {
-      text: "🚫 Solo los *administradores* pueden usar este comando."
+      text: "🚫 Solo los administradores pueden usar este comando."
     }, { quoted: msg });
   }
 
   if (!isBotAdmin) {
     return conn.sendMessage(chatId, {
-      text: "🤖 El bot necesita ser *administrador* para expulsar usuarios."
+      text: "🤖 El bot necesita ser administrador para poder expulsar usuarios."
     }, { quoted: msg });
   }
 
@@ -39,7 +39,7 @@ const handler = async (msg, { conn, args, participants }) => {
 
   if (!targetID) {
     return conn.sendMessage(chatId, {
-      text: "🔎 *Etiqueta* o *responde* a alguien para advertirlo."
+      text: "🔎 Menciona o responde a alguien para advertirlo."
     }, { quoted: msg });
   }
 
@@ -50,7 +50,9 @@ const handler = async (msg, { conn, args, participants }) => {
   }
 
   const targetNum = targetID.split("@")[0];
-  const isTargetOwner = global.owner.some(([id]) => id === targetNum);
+
+  // Si global.owner no existe, no lo usamos
+  const isTargetOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === targetNum);
 
   if (isTargetOwner) {
     return conn.sendMessage(chatId, {
@@ -69,7 +71,7 @@ const handler = async (msg, { conn, args, participants }) => {
 
   if (warns >= MAX_WARNINGS) {
     await conn.sendMessage(chatId, {
-      text: `❌ @${targetNum} ha recibido *3 advertencias* y será *eliminado del grupo*.`,
+      text: `❌ @${targetNum} ha recibido *3 advertencias* y será eliminado.`,
       mentions: [targetID]
     }, { quoted: msg });
 
@@ -79,7 +81,7 @@ const handler = async (msg, { conn, args, participants }) => {
     fs.writeFileSync(WARN_PATH, JSON.stringify(data, null, 2));
   } else {
     await conn.sendMessage(chatId, {
-      text: `⚠️ @${targetNum} ha recibido una *advertencia*.\n\n📌 Advertencias: *${warns}/3*`,
+      text: `⚠️ @${targetNum} ha recibido una advertencia.\n📌 Advertencias: *${warns}/3*`,
       mentions: [targetID]
     }, { quoted: msg });
   }
