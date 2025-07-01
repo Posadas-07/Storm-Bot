@@ -10,39 +10,60 @@ const handler = async (msg, { conn, args }) => {
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
+  const botID = conn.user?.id || conn.user?.jid;
 
-  // Este comando funcionará para todos (sin verificar admin)
+  // Obtener participantes en el grupo (para ver admin)
+  const metadata = await conn.groupMetadata(chatId);
+  const participants = metadata.participants || [];
+
+  const isSenderAdmin = participants.some(p => p.id === senderID && (p.admin === "admin" || p.admin === "superadmin"));
+  const isBotAdmin = participants.some(p => p.id === botID && (p.admin === "admin" || p.admin === "superadmin"));
+
+  if (!isSenderAdmin) {
+    return conn.sendMessage(chatId, {
+      text: "🚫 *Solo los administradores pueden usar este comando.*"
+    }, { quoted: msg });
+  }
+
+  if (!isBotAdmin) {
+    return conn.sendMessage(chatId, {
+      text: "🤖 *Necesito ser administrador para poder expulsar usuarios con 3 advertencias.*"
+    }, { quoted: msg });
+  }
+
+  // Obtener objetivo (mencionado o mensaje respondido)
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
 
   if (ctx?.participant) {
     targetID = ctx.participant;
   } else if (args[0]) {
-    const raw = args[0].replace(/[^0-9]/g, "");
-    if (raw) targetID = `${raw}@s.whatsapp.net`;
+    const num = args[0].replace(/[^0-9]/g, "");
+    if (num) targetID = `${num}@s.whatsapp.net`;
   }
 
   if (!targetID) {
     return conn.sendMessage(chatId, {
-      text: "🔎 Responde o menciona a alguien para advertirlo."
+      text: "🔎 *Menciona o responde a alguien para advertirlo.*"
     }, { quoted: msg });
   }
 
   if (targetID === senderID) {
     return conn.sendMessage(chatId, {
-      text: "😅 No puedes advertirte a ti mismo."
+      text: "😅 *No puedes advertirte a ti mismo.*"
     }, { quoted: msg });
   }
 
   const targetNum = targetID.split("@")[0];
 
+  // Leer o crear archivo de advertencias
   let data = {};
-  try {
-    if (fs.existsSync(WARN_PATH)) {
+  if (fs.existsSync(WARN_PATH)) {
+    try {
       data = JSON.parse(fs.readFileSync(WARN_PATH));
+    } catch {
+      data = {};
     }
-  } catch {
-    data = {};
   }
 
   if (!data[chatId]) data[chatId] = {};
@@ -55,17 +76,18 @@ const handler = async (msg, { conn, args }) => {
 
   if (warns >= MAX_WARNINGS) {
     await conn.sendMessage(chatId, {
-      text: `❌ @${targetNum} fue advertido 3 veces y será eliminado.`,
+      text: `❌ @${targetNum} ha recibido *3 advertencias* y será *eliminado del grupo*.`,
       mentions: [targetID]
     }, { quoted: msg });
 
     await conn.groupParticipantsUpdate(chatId, [targetID], "remove");
 
+    // Reiniciar advertencias
     data[chatId][targetID] = 0;
     fs.writeFileSync(WARN_PATH, JSON.stringify(data, null, 2));
   } else {
     await conn.sendMessage(chatId, {
-      text: `⚠️ @${targetNum} ha sido advertido.\nAdvertencias: *${warns}/3*`,
+      text: `⚠️ @${targetNum} ha recibido una *advertencia*.\n📌 Advertencias: *${warns}/3*`,
       mentions: [targetID]
     }, { quoted: msg });
   }
