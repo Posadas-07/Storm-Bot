@@ -12,24 +12,21 @@ const handler = async (msg, { conn, args, participants }) => {
   const senderNum = senderID.split("@")[0];
   const botID = conn.user.jid;
 
-  const isSenderAdmin = participants.find(p => p.id === senderID)?.admin;
-  const isBotAdmin = participants.find(p => p.id === botID)?.admin;
+  const isSenderAdmin = participants.some(p => p.id === senderID && (p.admin === "admin" || p.admin === "superadmin"));
+  const isBotAdmin = participants.some(p => p.id === botID && (p.admin === "admin" || p.admin === "superadmin"));
 
   if (!isSenderAdmin) {
-    await conn.sendMessage(chatId, {
-      text: "🚫 Solo los administradores pueden usar este comando."
+    return conn.sendMessage(chatId, {
+      text: "🚫 Solo los *administradores* pueden usar este comando."
     }, { quoted: msg });
-    return;
   }
 
   if (!isBotAdmin) {
-    await conn.sendMessage(chatId, {
-      text: "🤖 El bot necesita ser administrador para expulsar usuarios."
+    return conn.sendMessage(chatId, {
+      text: "🤖 El bot necesita ser *administrador* para expulsar usuarios."
     }, { quoted: msg });
-    return;
   }
 
-  // Obtener destinatario
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
 
@@ -41,26 +38,24 @@ const handler = async (msg, { conn, args, participants }) => {
   }
 
   if (!targetID) {
-    await conn.sendMessage(chatId, {
-      text: "🔎 Menciona o responde a alguien para advertirlo."
+    return conn.sendMessage(chatId, {
+      text: "🔎 *Etiqueta* o *responde* a alguien para advertirlo."
     }, { quoted: msg });
-    return;
   }
 
   if (targetID === senderID) {
-    await conn.sendMessage(chatId, {
-      text: "🙃 No puedes advertirte a ti mismo."
+    return conn.sendMessage(chatId, {
+      text: "😅 No puedes advertirte a ti mismo."
     }, { quoted: msg });
-    return;
   }
 
   const targetNum = targetID.split("@")[0];
   const isTargetOwner = global.owner.some(([id]) => id === targetNum);
+
   if (isTargetOwner) {
-    await conn.sendMessage(chatId, {
+    return conn.sendMessage(chatId, {
       text: "🛡️ No puedes advertir al dueño del bot."
     }, { quoted: msg });
-    return;
   }
 
   let data = fs.existsSync(WARN_PATH) ? JSON.parse(fs.readFileSync(WARN_PATH)) : {};
@@ -69,11 +64,12 @@ const handler = async (msg, { conn, args, participants }) => {
 
   data[chatId][targetID] += 1;
   const warns = data[chatId][targetID];
+
   fs.writeFileSync(WARN_PATH, JSON.stringify(data, null, 2));
 
   if (warns >= MAX_WARNINGS) {
     await conn.sendMessage(chatId, {
-      text: `❌ @${targetNum} ha recibido *3 advertencias* y será eliminado.`,
+      text: `❌ @${targetNum} ha recibido *3 advertencias* y será *eliminado del grupo*.`,
       mentions: [targetID]
     }, { quoted: msg });
 
@@ -83,7 +79,7 @@ const handler = async (msg, { conn, args, participants }) => {
     fs.writeFileSync(WARN_PATH, JSON.stringify(data, null, 2));
   } else {
     await conn.sendMessage(chatId, {
-      text: `⚠️ @${targetNum} ha recibido una advertencia.\n📌 Advertencias: *${warns}/3*`,
+      text: `⚠️ @${targetNum} ha recibido una *advertencia*.\n\n📌 Advertencias: *${warns}/3*`,
       mentions: [targetID]
     }, { quoted: msg });
   }
