@@ -11,11 +11,11 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
-  const videoUrl = "https://cdn.russellxz.click/d3e507c0.mp4"; // 🎥 Tu video con audio
+  const videoUrl = "https://cdn.russellxz.click/8ff54048.mp4"; // 🎥 Tu video con audio
 
   await conn.sendMessage(chatId, {
     video: { url: videoUrl },
-    caption: "🎥 PAIN..."
+    caption: "🎥 DESTRUCCIÓN..."
   }, { quoted: msg });
 
   await conn.sendMessage(chatId, {
