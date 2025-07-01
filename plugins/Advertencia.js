@@ -27,6 +27,7 @@ const handler = async (msg, { conn, args, participants }) => {
     }, { quoted: msg });
   }
 
+  // Obtener usuario a advertir
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
   let targetID;
 
@@ -45,28 +46,30 @@ const handler = async (msg, { conn, args, participants }) => {
 
   if (targetID === senderID) {
     return conn.sendMessage(chatId, {
-      text: "😅 No puedes advertirte a ti mismo."
+      text: "🙃 No puedes advertirte a ti mismo."
     }, { quoted: msg });
   }
 
   const targetNum = targetID.split("@")[0];
 
-  // Si global.owner no existe, no lo usamos
-  const isTargetOwner = Array.isArray(global.owner) && global.owner.some(([id]) => id === targetNum);
-
-  if (isTargetOwner) {
-    return conn.sendMessage(chatId, {
-      text: "🛡️ No puedes advertir al dueño del bot."
-    }, { quoted: msg });
+  // Inicializar archivo y datos
+  let data = {};
+  if (fs.existsSync(WARN_PATH)) {
+    try {
+      data = JSON.parse(fs.readFileSync(WARN_PATH));
+    } catch {
+      data = {};
+    }
   }
 
-  let data = fs.existsSync(WARN_PATH) ? JSON.parse(fs.readFileSync(WARN_PATH)) : {};
   if (!data[chatId]) data[chatId] = {};
   if (!data[chatId][targetID]) data[chatId][targetID] = 0;
 
+  // Incrementar advertencia
   data[chatId][targetID] += 1;
   const warns = data[chatId][targetID];
 
+  // Guardar advertencia
   fs.writeFileSync(WARN_PATH, JSON.stringify(data, null, 2));
 
   if (warns >= MAX_WARNINGS) {
