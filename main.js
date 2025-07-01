@@ -3444,6 +3444,9 @@ case 'menuowner': {
 ━━━━━━━━━━━━━━━━━━━━  
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯  
 ➠ ${global.prefix}bc  
+➠ ${global.prefix}pain
+➠ ${global.prefix}llegando
+➠ ${global.prefix}destruccion 
 ➠ ${global.prefix}rest  
 ➠ ${global.prefix}carga
 ➠ ${global.prefix}cargabots
@@ -3743,7 +3746,9 @@ case 'menu': {
 ╭──────────────╮  
 │ ✦ 𝙈𝙄𝙉𝙄 𝙅𝙐𝙀𝙂𝙊𝙎 ✦ │  
 ╰──────────────╯  
-⎔ ${global.prefix}verdad  
+⎔ ${global.prefix}verdad 
+⎔ ${global.prefix}rex
+⎔ ${global.prefix}alpha
 ⎔ ${global.prefix}kiss
 ⎔ ${global.prefix}abrazar 
 ⎔ ${global.prefix}matar
