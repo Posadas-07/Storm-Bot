@@ -21,7 +21,7 @@ const textos = [
 ];
 
 const SLAP_PATH = path.resolve("slap_data.json");
-const SLAP_COOLDOWN = 2 * 60 * 1000; // 2 minutos
+const SLAP_COOLDOWN = 10 * 60 * 1000; // 10 minutos
 
 const handler = async (msg, { conn, args }) => {
   const isGroup = msg.key.remoteJid.endsWith("@g.us");
@@ -33,13 +33,14 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Reacción inicial
   await conn.sendMessage(chatId, {
     react: { text: "🤜", key: msg.key }
   });
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
+
+  const isOwner = global.owner.some(([id]) => id === senderNum);
 
   // Obtener destinatario
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
@@ -49,7 +50,7 @@ const handler = async (msg, { conn, args }) => {
     targetID = ctx.participant;
   } else if (args[0]) {
     const raw = args[0].replace(/[^0-9]/g, "");
-    targetID = raw ? `${raw}@s.whatsapp.net` : null;
+    if (raw) targetID = `${raw}@s.whatsapp.net`;
   }
 
   if (!targetID) {
@@ -65,20 +66,25 @@ const handler = async (msg, { conn, args }) => {
   }
 
   let data = fs.existsSync(SLAP_PATH) ? JSON.parse(fs.readFileSync(SLAP_PATH)) : {};
+  if (!data.cooldown) data.cooldown = {};
   if (!data[chatId]) data[chatId] = { slapDados: {}, slapRecibidos: {} };
 
   const ahora = Date.now();
-  const last = data[chatId].slapDados[senderNum]?.usuarios?.[targetID]?.last || 0;
+  const last = data.cooldown[senderNum] || 0;
 
-  if (ahora - last < SLAP_COOLDOWN) {
+  if (!isOwner && ahora - last < SLAP_COOLDOWN) {
     const mins = Math.ceil((SLAP_COOLDOWN - (ahora - last)) / 60000);
     return conn.sendMessage(chatId, {
-      text: `⏳ Debes esperar *${mins} minuto(s)* para volver a cachetear a ese usuario.`,
-      mentions: [targetID]
+      text: `⏳ Espera *${mins} minuto(s)* para volver a usar el comando.`,
+      mentions: [senderID]
     }, { quoted: msg });
   }
 
-  // Actualizar slap dados
+  if (!isOwner) {
+    data.cooldown[senderNum] = ahora;
+  }
+
+  // Guardar slap dados
   if (!data[chatId].slapDados[senderNum]) {
     data[chatId].slapDados[senderNum] = { total: 0, usuarios: {} };
   }
@@ -89,7 +95,7 @@ const handler = async (msg, { conn, args }) => {
   data[chatId].slapDados[senderNum].usuarios[targetID].count += 1;
   data[chatId].slapDados[senderNum].usuarios[targetID].last = ahora;
 
-  // Actualizar slap recibidos
+  // Guardar slap recibidos
   const targetNum = targetID.split("@")[0];
   if (!data[chatId].slapRecibidos[targetNum]) {
     data[chatId].slapRecibidos[targetNum] = { total: 0, usuarios: {} };
@@ -102,7 +108,6 @@ const handler = async (msg, { conn, args }) => {
 
   fs.writeFileSync(SLAP_PATH, JSON.stringify(data, null, 2));
 
-  // Mensaje y gif aleatorio
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textos[Math.floor(Math.random() * textos.length)]
     .replace("@1", `@${senderNum}`)
