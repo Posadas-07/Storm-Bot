@@ -3445,6 +3445,7 @@ case 'menuowner': {
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯  
 ➠ ${global.prefix}bc  
 ➠ ${global.prefix}pain
+➠ ${global.prefix}hr2
 ➠ ${global.prefix}llegando
 ➠ ${global.prefix}destruccion 
 ➠ ${global.prefix}rest  
@@ -3748,6 +3749,8 @@ case 'menu': {
 ╰──────────────╯  
 ⎔ ${global.prefix}verdad 
 ⎔ ${global.prefix}rex
+⎔ ${global.prefix}golpear
+⎔ ${global.prefix}spino
 ⎔ ${global.prefix}alpha
 ⎔ ${global.prefix}kiss
 ⎔ ${global.prefix}abrazar 
