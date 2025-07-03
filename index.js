@@ -775,7 +775,7 @@ if (msg.message?.protocolMessage?.type === 0) {
       }
     } else if (deletedData.text) {
       await sock.sendMessage(chatId, {
-        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${senderNumber}`,
+        text: `📝 *Mensaje eliminado:* ${deletedData.text}\n👤 *Usuario:* @${jid}`,
         mentions: [`${senderNumber}@s.whatsapp.net`]
       }, { quoted: msg });
     }
