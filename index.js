@@ -448,7 +448,8 @@ await sock.sendMessage(update.id, {
 
 } }
 
-// DESPEDIDA: solo cuando alguien sale if (update.action === "remove" && despedidasActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; let customBye = ""; try { const data = fs.existsSync("./byemsgs.json") ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8")) : {}; customBye = data[update.id]; } catch (e) {}
+// DESPEDIDA: solo cuando alguien sale 
+if (update.action === "remove" && despedidasActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; let customBye = ""; try { const data = fs.existsSync("./byemsgs.json") ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8")) : {}; customBye = data[update.id]; } catch (e) {}
 
 let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 try {
