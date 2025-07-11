@@ -19,8 +19,10 @@ const handler = async (msg, { conn }) => {
 
   const text = cleanBody.slice(match[0].length).trim();
 
-  // Cooldown: 15 minutos
-  if (usosPorUsuarioTT[senderNum] && Date.now() < usosPorUsuarioTT[senderNum]) {
+  const isOwner = global.owner?.some(([num]) => num === senderNum);
+
+  // Cooldown: 15 minutos excepto para owner
+  if (!isOwner && usosPorUsuarioTT[senderNum] && Date.now() < usosPorUsuarioTT[senderNum]) {
     const minutos = Math.ceil((usosPorUsuarioTT[senderNum] - Date.now()) / 60000);
     return conn.sendMessage(chatId, {
       text: `🕒 Espera *${minutos} minuto(s)* antes de volver a usar este comando.`
@@ -88,7 +90,9 @@ ${usedPrefix}ttsearch carros deportivos`
       usos: 0
     };
 
-    usosPorUsuarioTT[senderNum] = Date.now() + 15 * 60 * 1000;
+    if (!isOwner) {
+      usosPorUsuarioTT[senderNum] = Date.now() + 15 * 60 * 1000;
+    }
 
     conn.ev.on("messages.upsert", async ({ messages }) => {
       const m = messages[0];
@@ -106,7 +110,7 @@ ${usedPrefix}ttsearch carros deportivos`
 
       if (usos >= 3) {
         return conn.sendMessage(chatId, {
-          text: "✅ Ya viste los 3 videos disponibles. Usa el comando de nuevo después de 15 minutos."
+          text: "✅ Ya viste los 3 videos disponibles. Usa el comando nuevamente más tarde."
         });
       }
 
@@ -126,7 +130,7 @@ ${usedPrefix}ttsearch carros deportivos`
 ╠❤️ 𝙻𝗂𝗄𝖾𝗌: ${likes || "0"}
 ╠🔗 𝙻𝗂𝗇𝗄: ${nowm}
 
-> ʀᴇᴀᴄᴄɪᴏɴᴀ ᴘᴀʀᴀ ᴇʟ sɪɢᴜɪᴇɴᴛᴇ ᴠɪᴅᴇ𝗈`.trim();
+> ʀᴇᴀᴄᴄɪᴏɴᴀ ᴘᴀʀᴀ ᴏᴛʀᴏ ᴠɪᴅᴇᴏ 𝘀ɪ𝓰ᴜɪᴇɴᴛᴇ`.trim();
 
       const newMsg = await conn.sendMessage(chatId, {
         video: { url: nowm },
