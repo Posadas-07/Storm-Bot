@@ -425,7 +425,7 @@ if (update.action === "add" && welcomeActivo) {
       mentions: [participant]
     });
 
-    const audioUrl = 'https://cdn.russellxz.click/47b66993.mp3';
+    const audioUrl = 'https://cdn.russellxz.click/cdbe2aeb.mp3';
     await sock.sendMessage(update.id, {
       audio: { url: audioUrl },
       mimetype: 'audio/mp4',
@@ -472,10 +472,19 @@ if (update.action === "remove" && despedidasActivo) {
       byeText = `╔═ 𝗦𝗘 𝗙𝗨𝗘 👋🏻═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n👋 *Ya era hora de irte*`;
     }
 
+    // Enviar imagen con caption
     await sock.sendMessage(update.id, {
       image: { url: profilePicUrl },
       caption: byeText,
       mentions: [participant]
+    });
+
+    // Enviar nota de voz (audio tipo PTT)
+    const audioUrl = 'https://cdn.russellxz.click/68d024cb.mp4'; // <- cámbialo si tienes otro audio
+    await sock.sendMessage(update.id, {
+      audio: { url: audioUrl },
+      mimetype: 'audio/mp4',
+      ptt: true
     });
   }
 }
