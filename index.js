@@ -403,7 +403,8 @@ if (fs.existsSync(welcomePath)) {
       "Hasta pronto, y gracias por haber compartido momentos inolvidables con Azura Ultra 2.0 Bot 👋💖."
     ];
 
-// BIENVENIDA: solo cuando alguien entra if (update.action === "add" && welcomeActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; const customMessage = customWelcomes[update.id]; let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; try { profilePicUrl = await sock.profilePictureUrl(participant, "image"); } catch (err) {}
+// BIENVENIDA: solo cuando alguien entra 
+if (update.action === "add" && welcomeActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; const customMessage = customWelcomes[update.id]; let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; try { profilePicUrl = await sock.profilePictureUrl(participant, "image"); } catch (err) {}
 
 let groupName = "";
 try {
