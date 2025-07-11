@@ -3747,6 +3747,27 @@ case 'menu': {
 ╭──────────────╮  
 │ ✦ 𝙈𝙄𝙉𝙄 𝙅𝙐𝙀𝙂𝙊𝙎 ✦ │  
 ╰──────────────╯  
+⎔ ${global.prefix}puta
+⎔ ${global.prefix}puto
+⎔ ${global.prefix}peruana
+⎔ ${global.prefix}peruano 
+⎔ ${global.prefix}lesbiana
+⎔ ${global.prefix}gay
+⎔ ${global.prefix}negra
+⎔ ${global.prefix}negro
+⎔ ${global.prefix}manca
+⎔ ${global.prefix}manco
+⎔ ${global.prefix}fea
+⎔ ${global.prefix}feo
+⎔ ${global.prefix}enana
+⎔ ${global.prefix}enano
+⎔ ${global.prefix}pajera
+⎔ ${global.prefix}pajero
+⎔ ${global.prefix}cachuda
+⎔ ${global.prefix}cachudo
+⎔ ${global.prefix}adopdata
+⎔ ${global.prefix}adoptado
+⎔ ${global.prefix}rata
 ⎔ ${global.prefix}verdad 
 ⎔ ${global.prefix}rex
 ⎔ ${global.prefix}golpear
