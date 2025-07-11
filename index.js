@@ -438,7 +438,7 @@ await sock.sendMessage(update.id, {
   mentions: [participant]
 });
 
-const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3';
+const audioUrl = 'https://cdn.russellxz.click/a3da6ecb.mp3';
 await sock.sendMessage(update.id, {
   audio: { url: audioUrl },
   mimetype: 'audio/mp4',
