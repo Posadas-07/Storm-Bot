@@ -403,93 +403,86 @@ if (fs.existsSync(welcomePath)) {
       "Hasta pronto, y gracias por haber compartido momentos inolvidables con Azura Ultra 2.0 Bot 👋💖."
     ];
 
-// Procesar según la acción: "add" (entrada) o "remove" (salida)
+// BIENVENIDA: solo cuando alguien entra if (update.action === "add" && welcomeActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; const customMessage = customWelcomes[update.id]; let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; try { profilePicUrl = await sock.profilePictureUrl(participant, "image"); } catch (err) {}
 
-// Si alguien entra y la bienvenida está activa
-if (update.action === "add" && welcomeActivo) {
-  for (const participant of update.participants) {
-    const mention = `@${participant.split("@")[0]}`;
-    const customMessage = customWelcomes[update.id];
-
-    // Obtener foto de perfil (o grupo si falla)
-    let profilePicUrl;
-    try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {
-      try {
-        profilePicUrl = await sock.profilePictureUrl(update.id, "image");
-      } catch {
-        profilePicUrl = "https://cdn.dorratz.com/files/1741323171822.jpg";
-      }
-    }
-
-    if (customMessage) {
-      // Enviar mensaje personalizado
-      await sock.sendMessage(update.id, {
-        image: { url: profilePicUrl },
-        caption: `👋 ${mention}\n\n${customMessage}`,
-        mentions: [participant]
-      });
-    } else {
-      // Elegir mensaje aleatorio
-      const mensajeTexto = welcomeTexts[Math.floor(Math.random() * welcomeTexts.length)];
-      const option = Math.random();
-
-      if (option < 0.33) {
-        await sock.sendMessage(update.id, {
-          image: { url: profilePicUrl },
-          caption: `👋 ${mention}\n\n${mensajeTexto}`,
-          mentions: [participant]
-        });
-      } else if (option < 0.66) {
-        let groupDesc = "";
-        try {
-          const metadata = await sock.groupMetadata(update.id);
-          groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "";
-        } catch (err) {
-          groupDesc = "";
-        }
-
-        await sock.sendMessage(update.id, {
-          text: `👋 ${mention}\n\n${mensajeTexto}${groupDesc}`,
-          mentions: [participant]
-        });
-      } else {
-        await sock.sendMessage(update.id, {
-          text: `👋 ${mention}\n\n${mensajeTexto}`,
-          mentions: [participant]
-        });
-      }
-    }
-  }
-} else if (update.action === "remove" && despedidasActivo) {
-  // Si alguien se va y despedidas está activado
-  for (const participant of update.participants) {
-    const mention = `@${participant.split("@")[0]}`;
-    const mensajeTexto = farewellTexts[Math.floor(Math.random() * farewellTexts.length)];
-    const option = Math.random();
-
-    let profilePicUrl;
-    try {
-      profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {
-      profilePicUrl = "https://cdn.dorratz.com/files/1741323171822.jpg";
-    }
-
-    if (option < 0.5) {
-      await sock.sendMessage(update.id, {
-        image: { url: profilePicUrl },
-        caption: `👋 ${mention}\n\n${mensajeTexto}`,
-        mentions: [participant]
-      });
-    } else {
-      await sock.sendMessage(update.id, {
-        text: `👋 ${mention}\n\n${mensajeTexto}`,
-        mentions: [participant]
-      });
-    }
-  }
+let groupName = "";
+try {
+  const metadata = await sock.groupMetadata(update.id);
+  groupName = metadata.subject || "Grupo desconocido";
+} catch (err) {
+  groupName = "Grupo desconocido";
 }
+
+let textoFinal = "";
+
+if (customMessage) {
+  if (/(@user)/gi.test(customMessage)) {
+    textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customMessage.replace(/@user/gi, mention)}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝`;
+  } else {
+    textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n\n${customMessage}`;
+  }
+} else {
+  let groupDesc = "";
+  try {
+    const metadata = await sock.groupMetadata(update.id);
+    groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+  } catch (err) {
+    groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+  }
+  textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝` + groupDesc;
+}
+
+await sock.sendMessage(update.id, {
+  image: { url: profilePicUrl },
+  caption: textoFinal,
+  mentions: [participant]
+});
+
+const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3';
+await sock.sendMessage(update.id, {
+  audio: { url: audioUrl },
+  mimetype: 'audio/mp4',
+  ptt: true
+});
+
+} }
+
+// DESPEDIDA: solo cuando alguien sale if (update.action === "remove" && despedidasActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; let customBye = ""; try { const data = fs.existsSync("./byemsgs.json") ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8")) : {}; customBye = data[update.id]; } catch (e) {}
+
+let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+try {
+  profilePicUrl = await sock.profilePictureUrl(participant, "image");
+} catch (err) {}
+
+let groupName = "";
+try {
+  const metadata = await sock.groupMetadata(update.id);
+  groupName = metadata.subject || "Grupo desconocido";
+} catch (err) {
+  groupName = "Grupo desconocido";
+}
+
+let byeText = "";
+
+if (customBye) {
+  if (/(@user)/gi.test(customBye)) {
+    byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customBye.replace(/@user/gi, mention)}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝`;
+  } else {
+    byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n\n${customBye}`;
+  }
+} else {
+  byeText = `╔═ 𝗦𝗘 𝗙𝗨𝗘 👋🏻═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n👋 ¡ᴇsᴘᴇʀᴀᴍᴏs ǫᴜᴇ́ ɴᴏ ᴠᴜᴇʟᴠᴀs ɴᴜɴᴄᴀ!`;
+}
+
+await sock.sendMessage(update.id, {
+  image: { url: profilePicUrl },
+  caption: byeText,
+  mentions: [participant]
+});
+
+} }
+
+
 // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
     // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 
