@@ -377,115 +377,130 @@ let customWelcomes = {};
 if (fs.existsSync(welcomePath)) {
   customWelcomes = JSON.parse(fs.readFileSync(welcomePath, "utf-8"));
 }
-    // Textos integrados para bienvenida y despedida
-    const welcomeTexts = [
-      "¡Bienvenido(a)! Azura Ultra 2.0 Bot te recibe con los brazos abiertos 🤗✨. ¡Disfruta y comparte!",
-      "¡Hola! Azura Ultra 2.0 Bot te abraza con alegría 🎉🤖. ¡Prepárate para grandes aventuras!",
-      "¡Saludos! Azura Ultra 2.0 Bot te da la bienvenida para que descubras ideas brillantes 🚀🌟.",
-      "¡Bienvenido(a) al grupo! Azura Ultra 2.0 Bot te invita a explorar un mundo de posibilidades 🤩💡.",
-      "¡Qué alegría verte! Azura Ultra 2.0 Bot te recibe y te hace sentir en casa 🏠💖.",
-      "¡Hola! Gracias por unirte; Azura Ultra 2.0 Bot te saluda con entusiasmo 🎊😊.",
-      "¡Bienvenido(a)! Cada nuevo miembro es una chispa de inspiración en Azura Ultra 2.0 Bot 🔥✨.",
-      "¡Saludos cordiales! Azura Ultra 2.0 Bot te envía un abrazo virtual 🤗💙.",
-      "¡Bienvenido(a)! Únete a la experiencia Azura Ultra 2.0 Bot y comparte grandes ideas 🎉🌈.",
-      "¡Hola! Azura Ultra 2.0 Bot te da la bienvenida para vivir experiencias inolvidables 🚀✨!"
-    ];
-    const farewellTexts = [
-      "¡Adiós! Azura Ultra 2.0 Bot te despide con gratitud y te desea éxitos en tus nuevos caminos 👋💫.",
-      "Hasta pronto, desde Azura Ultra 2.0 Bot te deseamos lo mejor y esperamos verte de nuevo 🌟🙏.",
-      "¡Chao! Azura Ultra 2.0 Bot se despide, pero siempre tendrás un lugar si decides regresar 🤗💔.",
-      "Nos despedimos con cariño; gracias por compartir momentos en Azura Ultra 2.0 Bot 🏠❤️.",
-      "¡Adiós, amigo(a)! Azura Ultra 2.0 Bot te manda un abrazo y te desea mucha suerte 🤝🌟.",
-      "Hasta luego, y gracias por haber sido parte de nuestra comunidad 🚀💙.",
-      "Chao, que tus futuros proyectos sean tan brillantes como tú 🌟✨. Azura Ultra 2.0 Bot te recuerda siempre.",
-      "¡Nos vemos! Azura Ultra 2.0 Bot te dice adiós con un corazón lleno de gratitud 🤗❤️.",
-      "¡Adiós! Que tu camino esté lleno de éxitos, te lo desea Azura Ultra 2.0 Bot 🚀🌟.",
-      "Hasta pronto, y gracias por haber compartido momentos inolvidables con Azura Ultra 2.0 Bot 👋💖."
-    ];
+// Textos integrados para bienvenida y despedida
+  "Hasta pronto, y gracias por haber compartido momentos inolvidables con 🪼 CORTANA 2.0 BOT 🪼 👋💖."
 
-// BIENVENIDA: solo cuando alguien entra 
-if (update.action === "add" && welcomeActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; const customMessage = customWelcomes[update.id]; let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg"; try { profilePicUrl = await sock.profilePictureUrl(participant, "image"); } catch (err) {}
+// BIENVENIDA: solo cuando alguien entra
+if (update.action === "add" && welcomeActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+    const customMessage = customWelcomes[update.id];
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
 
-let groupName = "";
-try {
-  const metadata = await sock.groupMetadata(update.id);
-  groupName = metadata.subject || "Grupo desconocido";
-} catch (err) {
-  groupName = "Grupo desconocido";
-}
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
 
-let textoFinal = "";
+    let groupName = "";
+    try {
+      const metadata = await sock.groupMetadata(update.id);
+      groupName = metadata.subject || "Grupo desconocido";
+    } catch (err) {
+      groupName = "Grupo desconocido";
+    }
 
-if (customMessage) {
-  if (/(@user)/gi.test(customMessage)) {
-    textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customMessage.replace(/@user/gi, mention)}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝`;
-  } else {
-    textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n\n${customMessage}`;
+    let textoFinal = "";
+
+    if (customMessage) {
+      if (/(@user)/gi.test(customMessage)) {
+        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${customMessage.replace(/@user/gi, mention)}\n` +
+                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
+      } else {
+        textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                     `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                     `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                     `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n\n${customMessage}`;
+      }
+    } else {
+      let groupDesc = "";
+      try {
+        const metadata = await sock.groupMetadata(update.id);
+        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch (err) {
+        groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+      }
+
+      textoFinal = `*╭━─━──────━─━╮*\n*╰╮»* 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔\n*╭━─━──────━─━╯*\n` +
+                   `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                   `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                   `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*` + groupDesc;
+    }
+
+    // Mensaje de bienvenida con imagen
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: textoFinal,
+      mentions: [participant]
+    });
+
+    // Enviar audio desde URL (ajusta tu URL abajo)
+    const audioUrl = 'https://cdn.russellxz.click/0e4d4b6c.mp3'; // <- pon aquí tu enlace
+    await sock.sendMessage(update.id, {
+      audio: { url: audioUrl },
+      mimetype: 'audio/mp4',
+      ptt: true
+    });
   }
-} else {
-  let groupDesc = "";
-  try {
-    const metadata = await sock.groupMetadata(update.id);
-    groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
-  } catch (err) {
-    groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
+}
+
+// DESPEDIDA: solo cuando alguien sale
+if (update.action === "remove" && despedidasActivo) {
+  for (const participant of update.participants) {
+    const mention = `@${participant.split("@")[0]}`;
+
+    // Carga el mensaje personalizado desde el archivo byemsgs.json
+    let customBye = "";
+    try {
+      const data = fs.existsSync("./byemsgs.json")
+        ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
+        : {};
+      customBye = data[update.id];
+    } catch (e) {}
+
+    let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
+    try {
+      profilePicUrl = await sock.profilePictureUrl(participant, "image");
+    } catch (err) {}
+
+    let groupName = "";
+    try {
+      const metadata = await sock.groupMetadata(update.id);
+      groupName = metadata.subject || "Grupo desconocido";
+    } catch (err) {
+      groupName = "Grupo desconocido";
+    }
+
+    let byeText = "";
+
+    if (customBye) {
+      if (/(@user)/gi.test(customBye)) {
+        byeText = `*╭━─━──────━─━╮*\n*╰╮»* 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢\n*╭━─━──────━─━╯*\n` +
+                  `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${customBye.replace(/@user/gi, mention)}\n` +
+                  `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                  `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*`;
+      } else {
+        byeText = `*╭━─━──────━─━╮*\n*╰╮»* 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢\n*╭━─━──────━─━╯*\n` +
+                  `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                  `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                  `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n\n${customBye}`;
+      }
+    } else {
+      byeText = `*╭━─━──────━─━╮*\n*╰╮»* 𝗦𝗘 𝗙𝗨𝗘 👋🏻\n*╭━─━──────━─━╯*\n` +
+                `*┊»* 👤𝑼𝒔𝒖𝒂𝒓𝒊𝒐: ${mention}\n` +
+                `*┊»* 👥𝑮𝒓𝒖𝒑𝒐: ${groupName}\n` +
+                `*╰┈┈┈┈┈┈┈┈┈┈┈┈≫*\n` +
+                `👋 ¡ᴇsᴘᴇʀᴀᴍᴏs ǫᴜᴇ́ ɴᴏ ᴠᴜᴇʟᴠᴀs ɴᴜɴᴄᴀ!`;
+    }
+
+    await sock.sendMessage(update.id, {
+      image: { url: profilePicUrl },
+      caption: byeText,
+      mentions: [participant]
+    });
   }
-  textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝` + groupDesc;
 }
-
-await sock.sendMessage(update.id, {
-  image: { url: profilePicUrl },
-  caption: textoFinal,
-  mentions: [participant]
-});
-
-const audioUrl = 'https://cdn.russellxz.click/a3da6ecb.mp3';
-await sock.sendMessage(update.id, {
-  audio: { url: audioUrl },
-  mimetype: 'audio/mp4',
-  ptt: true
-});
-
-} }
-
-// DESPEDIDA: solo cuando alguien sale 
-if (update.action === "remove" && despedidasActivo) { for (const participant of update.participants) { const mention = @${participant.split("@")[0]}; let customBye = ""; try { const data = fs.existsSync("./byemsgs.json") ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8")) : {}; customBye = data[update.id]; } catch (e) {}
-
-let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
-try {
-  profilePicUrl = await sock.profilePictureUrl(participant, "image");
-} catch (err) {}
-
-let groupName = "";
-try {
-  const metadata = await sock.groupMetadata(update.id);
-  groupName = metadata.subject || "Grupo desconocido";
-} catch (err) {
-  groupName = "Grupo desconocido";
-}
-
-let byeText = "";
-
-if (customBye) {
-  if (/(@user)/gi.test(customBye)) {
-    byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customBye.replace(/@user/gi, mention)}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝`;
-  } else {
-    byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n\n${customBye}`;
-  }
-} else {
-  byeText = `╔═ 𝗦𝗘 𝗙𝗨𝗘 👋🏻═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n👋 ¡ᴇsᴘᴇʀᴀᴍᴏs ǫᴜᴇ́ ɴᴏ ᴠᴜᴇʟᴠᴀs ɴᴜɴᴄᴀ!`;
-}
-
-await sock.sendMessage(update.id, {
-  image: { url: profilePicUrl },
-  caption: byeText,
-  mentions: [participant]
-});
-
-} }
-
-
-// **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
     // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 
   } catch (error) {
