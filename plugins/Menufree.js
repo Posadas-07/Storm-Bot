@@ -14,25 +14,18 @@ const handler = async (msg, { conn }) => {
    ✰ 𝙁𝙍𝙀𝙀 𝙁𝙄𝙍𝙀 𝙈𝙀𝙉𝙐 ✰
 ╰──────>⋆☽⋆⋆☾⋆<──────╯
 
-🍉 𝗠𝗔𝗣𝗔𝗦 🍉
-🍉 ➺ *${prefix}mapas*
-
 📃 𝗥𝗘𝗚𝗟𝗔𝗦 📃
 🍉 ➺ *${prefix}reglas*
 🍉 ➺ *${prefix}setreglas*
 
-🛡️ 𝗟𝗜𝗦𝗧𝗔 𝗩𝗘𝗥𝗦𝗨𝗦 🥷🏻
-🍉 ➺ *${prefix}4vs4*
-🍉 ➺ *${prefix}6vs6*
-🍉 ➺ *${prefix}12vs12*
-🍉 ➺ *${prefix}16vs16*
-🍉 ➺ *${prefix}20vs20*
-🍉 ➺ *${prefix}24vs24*
-🍉 ➺ *${prefix}guerr*
+🛡️ 𝗟𝗜𝗦𝗧𝗔 𝗩𝗘𝗥𝗦𝗨𝗦 
+🍉 ➺ *${prefix}vs8*
+🍉 ➺ *${prefix}vs10*
+🍉 ➺ *${prefix}vs15*
+🍉 ➺ *${prefix}vs30*
 
 ─────────────
-🤖 *Desarrollado por Russell XZ*
-🤖 *Azura Ultra*`;
+> MENÚ PARA HACER 🆚`;
 
     // Enviar menú con imagen
     await conn.sendMessage(chatId, {
