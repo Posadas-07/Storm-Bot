@@ -65,7 +65,7 @@ let handler = async (msg, { conn, args }) => {
   const espacioSuplentes = `🥷🏻 ┇\n🥷🏻 ┇`
 
   let plantilla = `
-*15 𝐕𝐒 15 - ESCUADRA COMPLETA*
+*30-EQUIPO ÚNICO*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎
 ${horaMsg}
@@ -140,7 +140,7 @@ Reacciona ❤️=Titular | 👍=Suplente
     let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
     let plantilla = `
-*15 𝐕𝐒 15 - ESCUADRA COMPLETA*
+*30-EQUIPO ÚNICO*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎
 ${data.horaMsg}
