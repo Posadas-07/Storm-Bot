@@ -58,7 +58,7 @@ let handler = async (msg, { conn, args }) => {
   const idPartida = new Date().getTime().toString()
 
   let plantilla = `
-*4 𝐕𝐒 4 - ESCUADRA ÚNICA*
+*8-ESCUADRA ÚNICA*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎
 ${horaMsg}
@@ -142,7 +142,7 @@ Reacciona ❤️=Titular | 👍=Suplente
     let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
 
     let plantilla = `
-*4 𝐕𝐒 4 - ESCUADRA ÚNICA*
+*8-ESCUADRA ÚNICA*
 
 ⏱ 𝐇𝐎𝐑𝐀𝐑𝐈𝐎
 ${data.horaMsg}
