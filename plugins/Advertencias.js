@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const handler = async (msg, { conn }) => {
+const handler = async (msg, { conn, command }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
@@ -36,49 +36,72 @@ const handler = async (msg, { conn }) => {
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "📍 *Debes responder o mencionar al usuario que deseas advertir.*",
+      text: "📍 *Debes responder o mencionar al usuario que deseas advertir o quitar advertencia.*",
     }, { quoted: msg });
   }
 
   const targetNum = target.replace(/[^0-9]/g, "");
   if (global.owner.some(([id]) => id === targetNum)) {
     return conn.sendMessage(chatId, {
-      text: "❌ *No puedes advertir al dueño del bot.*",
+      text: "❌ *No puedes usar este comando con el dueño del bot.*",
     }, { quoted: msg });
   }
 
-  // === Advertencias ===
   const warnPath = path.resolve("./database/warns.json");
   const warnData = fs.existsSync(warnPath) ? JSON.parse(fs.readFileSync(warnPath)) : {};
   if (!warnData[chatId]) warnData[chatId] = {};
   if (!warnData[chatId][target]) warnData[chatId][target] = 0;
 
-  warnData[chatId][target] += 1;
-  const totalWarns = warnData[chatId][target];
+  if (command === "advertencia") {
+    warnData[chatId][target] += 1;
+    const totalWarns = warnData[chatId][target];
+    fs.writeFileSync(warnPath, JSON.stringify(warnData, null, 2));
 
-  fs.writeFileSync(warnPath, JSON.stringify(warnData, null, 2));
-
-  if (totalWarns >= 3) {
-    await conn.sendMessage(chatId, {
-      text:
+    if (totalWarns >= 3) {
+      await conn.sendMessage(chatId, {
+        text:
 `❌ *Usuario expulsado por acumulación de advertencias.*
 
 ╭─⬣「 *Expulsado* 」⬣
 │ 👤 Usuario: @${target.split("@")[0]}
 │ ⚠️ Advertencias: ${totalWarns}/3
 ╰─⬣`,
-      mentions: [target]
-    }, { quoted: msg });
+        mentions: [target]
+      }, { quoted: msg });
 
-    await conn.groupParticipantsUpdate(chatId, [target], "remove");
-    warnData[chatId][target] = 0;
-    fs.writeFileSync(warnPath, JSON.stringify(warnData, null, 2));
-  } else {
-    await conn.sendMessage(chatId, {
-      text:
+      await conn.groupParticipantsUpdate(chatId, [target], "remove");
+      warnData[chatId][target] = 0;
+      fs.writeFileSync(warnPath, JSON.stringify(warnData, null, 2));
+    } else {
+      await conn.sendMessage(chatId, {
+        text:
 `⚠️ *Advertencia aplicada.*
 
 ╭─⬣「 *Advertencia* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ ⚠️ Advertencias: ${totalWarns}/3
+╰─⬣`,
+        mentions: [target]
+      }, { quoted: msg });
+    }
+  }
+
+  if (command === "quitaradvertencia") {
+    if (warnData[chatId][target] === 0) {
+      return conn.sendMessage(chatId, {
+        text: `✅ *El usuario no tiene advertencias que quitar.*`,
+      }, { quoted: msg });
+    }
+
+    warnData[chatId][target] -= 1;
+    fs.writeFileSync(warnPath, JSON.stringify(warnData, null, 2));
+
+    const totalWarns = warnData[chatId][target];
+    await conn.sendMessage(chatId, {
+      text:
+`🗑️ *Advertencia eliminada.*
+
+╭─⬣「 *Quitar advertencia* 」⬣
 │ 👤 Usuario: @${target.split("@")[0]}
 │ ⚠️ Advertencias: ${totalWarns}/3
 ╰─⬣`,
@@ -87,5 +110,5 @@ const handler = async (msg, { conn }) => {
   }
 };
 
-handler.command = ["advertencia"];
+handler.command = ["advertencia", "quitaradvertencia"];
 module.exports = handler;
