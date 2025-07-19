@@ -44,7 +44,7 @@ const handler = async (msg, { conn, command }) => {
 
   const usuariosOrdenados = Object.entries(groupData)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
+    .slice(0, 200);
 
   if (usuariosOrdenados.length === 0) {
     return await conn.sendMessage(chatId, {
@@ -52,7 +52,7 @@ const handler = async (msg, { conn, command }) => {
     }, { quoted: msg });
   }
 
-  let texto = `🏆 *Top 10 usuarios más activos en ${groupName}:*\n\n`;
+  let texto = `🏆 *Top usuarios más activos en ${groupName}:*\n\n`;
   const menciones = [];
 
   usuariosOrdenados.forEach(([userId, total], index) => {
