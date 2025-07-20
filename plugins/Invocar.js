@@ -3,7 +3,6 @@ const https = require("https");
 
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
-  const isGroup = chatId.endsWith("@g.us");
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isOwner = global.owner.some(([id]) => id === senderNum);
@@ -25,8 +24,12 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  const numero = match[1] + "@s.whatsapp.net";
-  const mencion = "@" + match[1];
+  const num = match[1]; // número sin @ ni +
+  const jid = num + "@s.whatsapp.net";
+  const mentionVisual = '@' + num; // texto visible para mención
+
+  // Cambia aquí la URL de la imagen que quieres usar
+  const urlImagen = "https://cdn.russellxz.click/082e7467.jpeg";
 
   // Función para descargar la imagen desde URL
   const getImageBuffer = (url) => new Promise((resolve, reject) => {
@@ -37,15 +40,14 @@ const handler = async (msg, { conn, args }) => {
     }).on('error', reject);
   });
 
-  // Usamos imagen remota
-  const imageBuffer = await getImageBuffer("https://cdn.russellxz.click/202f09bc.jpeg");
+  const imageBuffer = await getImageBuffer(urlImagen);
 
-  const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* ${mencion}`;
+  const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* ${mentionVisual}`;
 
   await conn.sendMessage(chatId, {
     image: imageBuffer,
     caption: textoFinal,
-    mentions: [numero]
+    mentions: [jid]
   }, { quoted: msg });
 };
 
