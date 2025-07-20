@@ -53,7 +53,7 @@ const handler = async (msg, { conn, args }) => {
   }
 
   // Descarga imagen
-  const urlImagen = "https://i.imgur.com/Ez3DoO2.jpg";
+  const urlImagen = "https://cdn.russellxz.click/7ec1b6ec.jpeg";
   const getImageBuffer = (url) => new Promise((resolve, reject) => {
     https.get(url, res => {
       const data = [];
