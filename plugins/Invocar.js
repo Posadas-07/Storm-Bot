@@ -1,4 +1,6 @@
 // plugins/invocar.js
+const https = require("https");
+
 const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
@@ -7,7 +9,6 @@ const handler = async (msg, { conn, args }) => {
   const isOwner = global.owner.some(([id]) => id === senderNum);
   const isFromMe = msg.key.fromMe;
 
-  // Solo el owner puede usar este comando
   if (!isOwner && !isFromMe) {
     return conn.sendMessage(chatId, {
       text: "🚫 *Este comando solo puede usarlo el owner.*"
@@ -27,20 +28,28 @@ const handler = async (msg, { conn, args }) => {
   const numero = match[1] + "@s.whatsapp.net";
   const mencion = "@" + match[1];
 
-  // Imagen para invocar (puedes cambiar el link o usar una local si prefieres)
-  const bufferImg = await conn.getBuffer("https://cdn.russellxz.click/202f09bc.jpeg");
+  // Función para descargar la imagen desde URL
+  const getImageBuffer = (url) => new Promise((resolve, reject) => {
+    https.get(url, res => {
+      const data = [];
+      res.on('data', chunk => data.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(data)));
+    }).on('error', reject);
+  });
 
-  // Mensaje con mención
+  // Usamos imagen remota
+  const imageBuffer = await getImageBuffer("https://i.imgur.com/Ez3DoO2.jpg");
+
   const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* ${mencion}`;
 
   await conn.sendMessage(chatId, {
-    image: bufferImg,
+    image: imageBuffer,
     caption: textoFinal,
     mentions: [numero]
   }, { quoted: msg });
 };
 
-handler.command = ["invocarr"];
+handler.command = ["invocar"];
 handler.tags = ["owner"];
 handler.help = ["invocar @usuario"];
 module.exports = handler;
