@@ -1,6 +1,6 @@
 const https = require("https");
 
-const handler = async (msg, { conn }) => {
+const handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
@@ -19,13 +19,29 @@ const handler = async (msg, { conn }) => {
     }, { quoted: msg });
   }
 
+  // Obtenemos contexto citado y menciones en args
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const target = context?.participant;
+  let target = context?.participant;
 
+  // Si no hay citado, revisamos si se pasó un @usuario en args
   if (!target) {
-    return conn.sendMessage(chatId, {
-      text: "⚠️ Responde al mensaje del usuario que quieres invocar."
-    }, { quoted: msg });
+    if (args.length === 0) {
+      return conn.sendMessage(chatId, {
+        text: "⚠️ Responde al mensaje o menciona al usuario que quieres invocar.\nEjemplo: .invocar @521234567890"
+      }, { quoted: msg });
+    }
+
+    // Buscar mención en args (ej: @521234567890)
+    const mention = args.find(arg => arg.startsWith("@"));
+    if (!mention) {
+      return conn.sendMessage(chatId, {
+        text: "⚠️ Debes mencionar al usuario con @."
+      }, { quoted: msg });
+    }
+
+    // Formateamos para JID
+    const num = mention.replace("@", "").replace(/\D/g, "");
+    target = num + "@s.whatsapp.net";
   }
 
   // No invocar al owner
@@ -37,7 +53,7 @@ const handler = async (msg, { conn }) => {
   }
 
   // Descarga imagen
-  const urlImagen = "https://cdn.russellxz.click/082e7467.jpeg";
+  const urlImagen = "https://i.imgur.com/Ez3DoO2.jpg";
   const getImageBuffer = (url) => new Promise((resolve, reject) => {
     https.get(url, res => {
       const data = [];
@@ -57,5 +73,5 @@ const handler = async (msg, { conn }) => {
   }, { quoted: msg });
 };
 
-handler.command = ["inv"];
+handler.command = ["invocar"];
 module.exports = handler;
