@@ -19,30 +19,34 @@ const handler = async (msg, { conn, args }) => {
     }, { quoted: msg });
   }
 
-  // Intentamos obtener usuario citado primero
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  let target = context?.participant;
+  const mentionedJid = context?.mentionedJid || [];
 
-  // Si no hay usuario citado, buscamos mención en args
-  if (!target) {
-    if (args.length === 0) {
-      return conn.sendMessage(chatId, {
-        text: "⚠️ Responde al mensaje o menciona al usuario que quieres invocar.\nEjemplo: .invocar @521234567890"
-      }, { quoted: msg });
-    }
+  let target = null;
 
+  // Si responde a alguien
+  if (context?.participant) {
+    target = context.participant;
+  }
+  // Si hay mención en el mensaje
+  else if (mentionedJid.length > 0) {
+    target = mentionedJid[0];
+  }
+  // Si menciona por texto con @
+  else if (args.length > 0) {
     const mention = args.find(arg => arg.startsWith("@") && /^\@\d{5,}$/.test(arg));
-    if (!mention) {
-      return conn.sendMessage(chatId, {
-        text: "⚠️ Debes mencionar al usuario con @ seguido del número.\nEjemplo: .invocar @521234567890"
-      }, { quoted: msg });
+    if (mention) {
+      const num = mention.replace("@", "");
+      target = num + "@s.whatsapp.net";
     }
-
-    const num = mention.replace("@", "");
-    target = num + "@s.whatsapp.net"; // Aquí aseguramos JID correcto
   }
 
-  // No invocar al owner
+  if (!target) {
+    return conn.sendMessage(chatId, {
+      text: "⚠️ Debes responder al mensaje o mencionar al usuario con @.\nEjemplo: .invocar @521234567890"
+    }, { quoted: msg });
+  }
+
   const targetNum = target.replace(/[^0-9]/g, "");
   if (global.owner.some(([id]) => id === targetNum)) {
     return conn.sendMessage(chatId, {
@@ -51,7 +55,7 @@ const handler = async (msg, { conn, args }) => {
   }
 
   // Descargar imagen
-  const urlImagen = "https://cdn.russellxz.click/7ec1b6ec.jpeg"; // Cambia la URL si quieres
+  const urlImagen = "https://cdn.russellxz.click/5cd1e264.jpeg";
   const getImageBuffer = (url) => new Promise((resolve, reject) => {
     https.get(url, res => {
       const data = [];
@@ -62,7 +66,6 @@ const handler = async (msg, { conn, args }) => {
 
   const imageBuffer = await getImageBuffer(urlImagen);
 
-  // Texto con mención real
   const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* @${target.split("@")[0]}`;
 
   await conn.sendMessage(chatId, {
