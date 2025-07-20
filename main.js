@@ -3354,6 +3354,14 @@ case 'allmenu': {
     try {
         const fs = require("fs");
 
+        // Verificar si el remitente es Owner
+        const senderNum = msg.key.participant || msg.key.remoteJid;
+        const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+        if (!isOwner) {
+            await sock.sendMessage(msg.key.remoteJid, { text: "❌ *Este comando solo puede usarlo el Owner.*" }, { quoted: msg });
+            return;
+        }
+
         const mainFilePath = "./main.js";
         if (!fs.existsSync(mainFilePath)) {
             await sock.sendMessage2(
@@ -3408,7 +3416,7 @@ case 'allmenu': {
         await sock.sendMessage2(
             chatId,
             {
-                video: { url: "https://cdn.russellxz.click/362e3f06.mp4" }, // Pon aquí tu URL de GIF en .mp4
+                video: { url: "https://cdn.russellxz.click/362e3f06.mp4" },
                 gifPlayback: true,
                 caption: commandList
             },
@@ -3427,6 +3435,15 @@ case 'allmenu': {
 }    
 case 'menuowner': {
   try {
+    const senderNum = msg.key.participant || msg.key.remoteJid;
+    const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    if (!isOwner) {
+      await sock.sendMessage(msg.key.remoteJid, {
+        text: "❌ *Este comando solo puede usarlo el Owner.*"
+      }, { quoted: msg });
+      return;
+    }
+
     await sock.sendMessage(msg.key.remoteJid, {
       react: { text: "👑", key: msg.key }
     });
@@ -3477,8 +3494,7 @@ case 'menuowner': {
 
          STORM`;
 
-    // Link al GIF animado en formato MP4
-    const gifUrl = "https://cdn.russellxz.click/de2f6d48.mp4"; // Cámbialo por el tuyo si quieres
+    const gifUrl = "https://cdn.russellxz.click/de2f6d48.mp4";
 
     await sock.sendMessage(chatId, {
       video: { url: gifUrl },
@@ -3496,6 +3512,15 @@ case 'menuowner': {
 }
 case 'menurpg': {
   try {
+    const senderNum = msg.key.participant || msg.key.remoteJid;
+    const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    if (!isOwner) {
+      await sock.sendMessage(msg.key.remoteJid, {
+        text: "❌ *Este comando solo puede usarlo el Owner.*"
+      }, { quoted: msg });
+      return;
+    }
+
     await sock.sendMessage(msg.key.remoteJid, {
       react: { text: "⚔️", key: msg.key }
     });
@@ -3565,17 +3590,14 @@ Así te registras
 │    STORM       
 ╰────────────╯`;
 
-    const videoUrl = "https://cdn.russellxz.click/0abb8549.jpeg";
-    const videoBuffer = (await axios.get(videoUrl, { responseType: 'arraybuffer' })).data;
-
-await sock.sendMessage2(
-  chatId,
-  {
-    image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
-    caption: menuText
-  },
-  msg 
-);
+    await sock.sendMessage2(
+      chatId,
+      {
+        image: { url: "https://cdn.russellxz.click/11f1af8e.jpeg" }, 
+        caption: menuText
+      },
+      msg 
+    );
 
   } catch (error) {
     console.error("Error en menurpg:", error);
@@ -3586,7 +3608,7 @@ await sock.sendMessage2(
     );
   }
   break;
-} 
+}
         
 case 'menu': {
   try {
@@ -3822,6 +3844,15 @@ case 'menu': {
 
 case 'menugrupo': {
   try {
+    const senderNum = msg.key.participant || msg.key.remoteJid;
+    const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    if (!isOwner) {
+      await sock.sendMessage(msg.key.remoteJid, {
+        text: "❌ *Este comando solo puede usarlo el Owner.*"
+      }, { quoted: msg });
+      return;
+    }
+
     await sock.sendMessage(msg.key.remoteJid, {
       react: { text: "📜", key: msg.key }
     });
@@ -3884,7 +3915,6 @@ case 'menugrupo': {
 
 ⟢ STORM ⟣`;
 
-    // Puedes cambiar este link por cualquier GIF en formato .mp4
     const gifUrl = "https://cdn.russellxz.click/a7d05a77.mp4";
 
     await sock.sendMessage(chatId, {
