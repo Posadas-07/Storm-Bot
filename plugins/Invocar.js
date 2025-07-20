@@ -1,4 +1,3 @@
-// plugins/invocar.js
 const https = require("https");
 
 const handler = async (msg, { conn, args }) => {
@@ -26,10 +25,6 @@ const handler = async (msg, { conn, args }) => {
 
   const num = match[1]; // número sin @ ni +
   const jid = num + "@s.whatsapp.net";
-  const mentionVisual = '@' + num; // texto visible para mención
-
-  // Cambia aquí la URL de la imagen que quieres usar
-  const urlImagen = "https://cdn.russellxz.click/082e7467.jpeg";
 
   // Función para descargar la imagen desde URL
   const getImageBuffer = (url) => new Promise((resolve, reject) => {
@@ -40,9 +35,12 @@ const handler = async (msg, { conn, args }) => {
     }).on('error', reject);
   });
 
+  const urlImagen = "https://cdn.russellxz.click/082e7467.jpeg"; // Cambia aquí tu URL
+
   const imageBuffer = await getImageBuffer(urlImagen);
 
-  const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* ${mentionVisual}`;
+  // Texto con mención real (solo número)
+  const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* @${jid.split("@")[0]}`;
 
   await conn.sendMessage(chatId, {
     image: imageBuffer,
