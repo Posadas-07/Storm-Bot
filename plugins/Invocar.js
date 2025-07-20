@@ -38,7 +38,7 @@ const handler = async (msg, { conn, args }) => {
   });
 
   // Usamos imagen remota
-  const imageBuffer = await getImageBuffer("https://i.imgur.com/Ez3DoO2.jpg");
+  const imageBuffer = await getImageBuffer("https://cdn.russellxz.click/202f09bc.jpeg");
 
   const textoFinal = `🌀 *𝗘𝗟 𝗢𝗪𝗡𝗘𝗥 𝗧𝗘 𝗛𝗔 𝗜𝗡𝗩𝗢𝗖𝗔𝗗𝗢* ${mencion}`;
 
