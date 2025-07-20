@@ -49,7 +49,7 @@ const handler = async (msg, { conn, args }) => {
   }, { quoted: msg });
 };
 
-handler.command = ["invocar"];
+handler.command = ["inv"];
 handler.tags = ["owner"];
 handler.help = ["invocar @usuario"];
 module.exports = handler;
