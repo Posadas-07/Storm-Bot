@@ -10769,21 +10769,16 @@ case 'reto': {
             
 case 'tts': {
     try {
-        // 1) Envía primero la reacción (🗣️) indicando que se empieza a procesar
         await sock.sendMessage(msg.key.remoteJid, {
             react: { text: "🗣️", key: msg.key },
         });
 
-        // 2) Obtiene el texto:
-        //    - Directamente de 'text'
-        //    - O del mensaje citado (si no hay 'text')
         let textToSay = (text || "").trim();
         if (!textToSay && msg.message.extendedTextMessage?.contextInfo?.quotedMessage) {
             textToSay = msg.message.extendedTextMessage.contextInfo.quotedMessage.conversation || "";
             textToSay = textToSay.trim();
         }
 
-        // 3) Verifica si al final sí hay algo de texto
         if (!textToSay) {
             await sock.sendMessage(msg.key.remoteJid, {
                 text: "Por favor, proporciona un texto o cita un mensaje para convertir a voz."
@@ -10791,20 +10786,20 @@ case 'tts': {
             return;
         }
 
-        // 4) Indica que está "grabando" (opcional, para mostrar un indicador)
         await sock.sendPresenceUpdate('recording', msg.key.remoteJid);
 
-        // 5) Usa google-tts-api para obtener la URL del audio
-        const SpeakEngine = require("google-tts-api");
-        const textToSpeechUrl = SpeakEngine.getAudioUrl(textToSay, {
-            lang: "es",
-            slow: false,
-            host: "https://translate.google.com",
+        const axios = require('axios');
+        const urlEncodedText = encodeURIComponent(textToSay);
+        const apiUrl = `https://api.nekorinn.my.id/tools/openai-tts?text=${urlEncodedText}`;
+
+        const response = await axios.get(apiUrl, {
+            responseType: 'arraybuffer'
         });
 
-        // 6) Envía el audio como nota de voz
+        const buffer = Buffer.from(response.data, 'binary');
+
         await sock.sendMessage(msg.key.remoteJid, {
-            audio: { url: textToSpeechUrl },
+            audio: buffer,
             ptt: true,
             mimetype: 'audio/mpeg',
             fileName: `tts.mp3`,
@@ -10817,7 +10812,7 @@ case 'tts': {
         }, { quoted: msg });
     }
     break;
-}
+          }
 
 case 'meme':
 case 'memes': {
