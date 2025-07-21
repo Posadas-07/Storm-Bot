@@ -3,6 +3,7 @@ const path = require("path");
 
 const marryPath = path.resolve("./marry.json");
 
+// Funciones para leer/escribir base de datos
 function readData() {
   return fs.existsSync(marryPath) ? JSON.parse(fs.readFileSync(marryPath)) : {};
 }
@@ -10,12 +11,12 @@ function writeData(data) {
   fs.writeFileSync(marryPath, JSON.stringify(data, null, 2));
 }
 
-const proposals = {}; // chatId: { proposee: proposer }
+// Propuestas pendientes por grupo
+const proposals = {}; // chatId: { proposee, proposer }
 
 const handler = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
 
   if (!isGroup) {
@@ -60,34 +61,40 @@ const handler = async (msg, { conn }) => {
 
   // Mensaje de propuesta
   await conn.sendMessage(chatId, {
-    text: `💍 @${senderNum} le ha propuesto matrimonio a @${proposee.split("@")[0]}.\n\nResponde a este mensaje con "sí" para aceptar 💞\nO responde con "no" para rechazar 💔.`,
+    text: `💍 @${senderId.replace(/[^0-9]/g, "")} le ha propuesto matrimonio a @${proposee.replace(/[^0-9]/g, "")}.\n\nResponde a este mensaje con "sí" para aceptar 💞\nO responde con "no" para rechazar 💔.`,
     mentions: [senderId, proposee]
   }, { quoted: msg });
 };
 
 // Manejador de respuestas "sí"/"no" al mensaje de propuesta
 const replyHandler = async (msg, { conn }) => {
-  if (!msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) return;
-
   const chatId = msg.key.remoteJid;
   const senderId = msg.key.participant || msg.key.remoteJid;
-  const replyText = (msg.message?.conversation || "").trim().toLowerCase();
+
+  // Obtén el texto de respuesta (puede venir en diferentes campos)
+  const replyText = (
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    ""
+  ).trim().toLowerCase();
+
+  // Verifica si hay una propuesta pendiente en este grupo
   const proposal = proposals[chatId];
   if (!proposal) return;
 
   // Solo la persona propuesta puede responder
   if (senderId !== proposal.proposee) return;
 
-  // Solo si responde a la propuesta
-  const quoted = msg.message.extendedTextMessage.contextInfo.quotedMessage;
+  // Solo si responde al mensaje de propuesta
+  const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
   const quotedText = quoted?.conversation || quoted?.text || "";
 
+  // Verifica si el quotedText contiene el texto de propuesta
   if (
     !quotedText.includes("le ha propuesto matrimonio") &&
     !quotedText.includes("Responde a este mensaje con")
   ) return;
 
-  // Procesar respuesta
   if (replyText === "sí" || replyText === "si") {
     // Guardar matrimonio
     let data = readData();
@@ -102,7 +109,6 @@ const replyHandler = async (msg, { conn }) => {
       mentions: [proposal.proposer, proposal.proposee]
     }, { quoted: msg });
 
-    // Eliminar propuesta
     delete proposals[chatId];
   } else if (replyText === "no") {
     await conn.sendMessage(chatId, {
