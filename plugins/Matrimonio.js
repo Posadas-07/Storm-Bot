@@ -9,14 +9,10 @@ const gifUrls = [
 ];
 
 const textosPropuesta = [
-  "💍 *@1 le pidió matrimonio a @2* ¡Qué romántico! 🥰",
-  "✨ *@1 quiere casarse con @2* ¿Aceptas esta propuesta? 💖",
-  "😍 *@1 está listo para dar el gran paso con @2* 👰🤵",
-  "❤️ *@1 quiere unir su vida a la de @2* para siempre 💞",
-  "🌹 *@1 ha declarado su amor eterno a @2* ¿Será correspondido? 🌙",
-  "💘 *@1 quiere compartir su vida con @2* ¿Aceptas? 💍",
-  "🎉 *@1 y @2 podrían celebrar una hermosa boda* ¿Sí o no? 🥳",
-  "💑 *@1 sueña con casarse con @2* ¿Acepta la propuesta? 💖"
+  "💍 *@1 le está pidiendo matrimonio a @2* ¿Aceptas? Responde con 'sí' para casarte o 'no' para rechazar.",
+  "✨ *@1 quiere casarse con @2* ¿Aceptas esta propuesta?",
+  "😍 *@1 ha decidido dar el gran paso con @2* ¿Quieres casarte?",
+  "❤️ *@1 quiere compartir su vida con @2*. ¿Aceptas casarte?",
 ];
 
 const textosAceptado = [
@@ -46,10 +42,6 @@ const handler = async (msg, { conn, args }) => {
       text: "⚠️ Este comando solo se puede usar en grupos."
     }, { quoted: msg });
   }
-
-  await conn.sendMessage(chatId, {
-    react: { text: "💍", key: msg.key }
-  });
 
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
@@ -107,19 +99,15 @@ const handler = async (msg, { conn, args }) => {
 
   fs.writeFileSync(MARRY_PATH, JSON.stringify(data, null, 2));
 
-  const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
   const texto = textosPropuesta[Math.floor(Math.random() * textosPropuesta.length)]
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetID.split("@")[0]}`);
 
-  // Mensaje de propuesta con instrucciones
+  // Mensaje solo texto de propuesta
   await conn.sendMessage(chatId, {
-    video: { url: gif },
-    gifPlayback: true,
-    caption: `${texto}\n\nResponde a este mensaje con *Sí* para aceptar 💍\nResponde con *No* para rechazar 💔`,
+    text: texto,
     mentions: [senderID, targetID]
   }, { quoted: msg });
-
 };
 
 // Handler secundario para aceptar/rechazar el matrimonio
@@ -135,7 +123,6 @@ const onReplyMarriage = async (msg, { conn }) => {
 
   if (!quotedKey) return; // No es respuesta a un mensaje
 
-  // Leer la base de datos
   let data = fs.existsSync(MARRY_PATH) ? JSON.parse(fs.readFileSync(MARRY_PATH)) : {};
   if (!data[chatId]) return;
 
@@ -160,13 +147,16 @@ const onReplyMarriage = async (msg, { conn }) => {
     delete data[chatId].propuestas[senderID][proposerNum];
     fs.writeFileSync(MARRY_PATH, JSON.stringify(data, null, 2));
 
-    // Mensaje bonito de boda
+    // Mensaje bonito + gif
+    const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
     const texto = textosAceptado[Math.floor(Math.random() * textosAceptado.length)]
       .replace("@1", `@${proposerNum}`)
       .replace("@2", `@${senderNum}`);
 
     await conn.sendMessage(chatId, {
-      text: texto,
+      video: { url: gif },
+      gifPlayback: true,
+      caption: texto,
       mentions: [`${proposerNum}@s.whatsapp.net`, senderID]
     }, { quoted: msg });
   } else if (replyText === "no") {
@@ -174,7 +164,7 @@ const onReplyMarriage = async (msg, { conn }) => {
     delete data[chatId].propuestas[senderID][proposerNum];
     fs.writeFileSync(MARRY_PATH, JSON.stringify(data, null, 2));
 
-    // Mensaje bonito de rechazo
+    // Solo texto de rechazo
     const texto = textosRechazo[Math.floor(Math.random() * textosRechazo.length)]
       .replace("@1", `@${proposerNum}`)
       .replace("@2", `@${senderNum}`);
@@ -186,10 +176,9 @@ const onReplyMarriage = async (msg, { conn }) => {
   }
 };
 
-// Necesitas llamar a onReplyMarriage cuando un mensaje sea respuesta a otro
-// Por ejemplo, en tu manejador principal de mensajes:
+// Recuerda conectar este handler en tu flujo principal de mensajes:
 // if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
-//   onReplyMarriage(msg, { conn });
+//   handler.onReplyMarriage(msg, { conn });
 // }
 
 handler.command = ["marry", "casarse", "matrimonio"];
