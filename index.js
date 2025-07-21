@@ -501,17 +501,7 @@ sock.ev.on("messages.upsert", async (messageUpsert) => {
   try {
     const msg = messageUpsert.messages[0];
     if (!msg) return;
-// Matrimonio: manejar respuestas "sí" o "no" a propuesta
-if (
-  msg.message?.extendedTextMessage?.contextInfo?.quotedMessage &&
-  typeof (
-    msg.message.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    ""
-  ) === "string"
-) {
-  await matrimonio.replyHandler(msg, { conn: sock });
-}
+
     const chatId = msg.key.remoteJid;
     const isGroup = chatId.endsWith("@g.us");
     const sender = msg.key.participant
