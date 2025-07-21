@@ -502,10 +502,13 @@ sock.ev.on("messages.upsert", async (messageUpsert) => {
     const msg = messageUpsert.messages[0];
     if (!msg) return;
 // Matrimonio: manejar respuestas "sí" o "no" a propuesta
-const matrimonio = require('./plugins/Matrimonio.js');
 if (
   msg.message?.extendedTextMessage?.contextInfo?.quotedMessage &&
-  typeof (msg.message.conversation || msg.message?.extendedTextMessage?.text) === "string"
+  typeof (
+    msg.message.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    ""
+  ) === "string"
 ) {
   await matrimonio.replyHandler(msg, { conn: sock });
 }
