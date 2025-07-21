@@ -3844,8 +3844,10 @@ case 'menu': {
 
 case 'menugrupo': {
   try {
-    const senderNum = msg.key.participant || msg.key.remoteJid;
-    const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    const sender = msg.key.participant || msg.key.remoteJid;
+    const senderNum = sender.replace(/[^0-9]/g, '');
+    const isOwner = global.owner.some(([id]) => id === senderNum || id === senderNum + '@s.whatsapp.net');
+
     if (!isOwner) {
       await sock.sendMessage(msg.key.remoteJid, {
         text: "❌ *Este comando solo puede usarlo el Owner.*"
@@ -3930,7 +3932,8 @@ case 'menugrupo': {
     }, { quoted: msg });
   }
   break;
-}
+    }
+
             
 case 'setinfo': {
   try {
