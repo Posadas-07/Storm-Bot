@@ -1,4 +1,12 @@
 const handler = async (msg, { conn }) => {
+  const senderNum = msg.key.participant || msg.key.remoteJid;
+  if (!global.owner.some(([id]) => id === senderNum.split('@')[0])) {
+    return await conn.sendMessage(msg.key.remoteJid, {
+      text: '❌ Solo el *owner* puede usar este comando.',
+      quoted: msg
+    });
+  }
+
   const chatId = msg.key.remoteJid;
 
   // Lista de URLs de videos animados (tipo GIF)
