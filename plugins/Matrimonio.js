@@ -2,12 +2,13 @@ const fs = require("fs");
 const path = require("path");
 
 const gifUrls = [
-  "https://cdn.russellxz.click/900d0c09.mp4",
-  "https://cdn.russellxz.click/087c498d.mp4",
-  "https://cdn.russellxz.click/ed4f584d.mp4"
+  "https://cdn.russellxz.click/5b056a4b.mp4",
+  "https://cdn.russellxz.click/5c5a4f5c.mp4",
+  "https://cdn.russellxz.click/f70fb41b.mp4",
+  "https://cdn.russellxz.click/45e2ec30.mp4"
 ];
 
-const textos = [
+const textosPropuesta = [
   "💍 *@1 le pidió matrimonio a @2* ¡Qué romántico! 🥰",
   "✨ *@1 quiere casarse con @2* ¿Aceptas esta propuesta? 💖",
   "😍 *@1 está listo para dar el gran paso con @2* 👰🤵",
@@ -16,6 +17,21 @@ const textos = [
   "💘 *@1 quiere compartir su vida con @2* ¿Aceptas? 💍",
   "🎉 *@1 y @2 podrían celebrar una hermosa boda* ¿Sí o no? 🥳",
   "💑 *@1 sueña con casarse con @2* ¿Acepta la propuesta? 💖"
+];
+
+const textosAceptado = [
+  "🎊 ¡Felicidades @1 y @2! Ahora están casados, que disfruten su luna de miel 🌙💖",
+  "💍 @1 y @2 han unido sus vidas ante todos, ¡qué viva el amor! 💞",
+  "🥂 ¡Brindemos por el matrimonio de @1 y @2! Que sean muy felices juntos 🎉",
+  "👰🤵 ¡La boda fue un éxito! @1 y @2 son oficialmente esposos 🥰",
+  "🌹 ¡El amor triunfó! @1 y @2 ahora son pareja para toda la vida 💘"
+];
+
+const textosRechazo = [
+  "💔 Qué triste, @2 rechazó la propuesta de matrimonio de @1. ¡Ánimo!",
+  "😢 El amor no siempre es correspondido... @2 dijo que no a @1.",
+  "⛔ @2 decidió no casarse con @1. ¡Quizá en otra ocasión!",
+  "😭 No hubo boda... @2 rechazó a @1."
 ];
 
 const MARRY_PATH = path.resolve("marry_data.json");
@@ -38,7 +54,7 @@ const handler = async (msg, { conn, args }) => {
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
 
-  const isOwner = global.owner.some(([id]) => id === senderNum);
+  const isOwner = global.owner?.some(([id]) => id === senderNum);
 
   // Obtener destinatario
   const ctx = msg.message?.extendedTextMessage?.contextInfo;
@@ -92,7 +108,7 @@ const handler = async (msg, { conn, args }) => {
   fs.writeFileSync(MARRY_PATH, JSON.stringify(data, null, 2));
 
   const gif = gifUrls[Math.floor(Math.random() * gifUrls.length)];
-  const texto = textos[Math.floor(Math.random() * textos.length)]
+  const texto = textosPropuesta[Math.floor(Math.random() * textosPropuesta.length)]
     .replace("@1", `@${senderNum}`)
     .replace("@2", `@${targetID.split("@")[0]}`);
 
@@ -103,24 +119,34 @@ const handler = async (msg, { conn, args }) => {
     caption: `${texto}\n\nResponde a este mensaje con *Sí* para aceptar 💍\nResponde con *No* para rechazar 💔`,
     mentions: [senderID, targetID]
   }, { quoted: msg });
+
 };
 
 // Handler secundario para aceptar/rechazar el matrimonio
-handler.onReply = async (msg, { conn }) => {
+const onReplyMarriage = async (msg, { conn }) => {
   const chatId = msg.key.remoteJid;
   const replyText = (msg.message?.conversation || '').trim().toLowerCase();
   const senderID = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderID.split("@")[0];
 
+  // Obtener el mensaje al que están respondiendo
+  const quotedKey = msg.message?.extendedTextMessage?.contextInfo?.stanzaId ||
+                    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.key?.id;
+
+  if (!quotedKey) return; // No es respuesta a un mensaje
+
+  // Leer la base de datos
   let data = fs.existsSync(MARRY_PATH) ? JSON.parse(fs.readFileSync(MARRY_PATH)) : {};
   if (!data[chatId]) return;
 
-  // Verificar si hay propuesta pendiente
-  const propuestas = data[chatId].propuestas[senderID];
-  if (!propuestas) return;
-
-  // Buscar el primer usuario que le propuso matrimonio
-  const proposerNum = Object.keys(propuestas)[0];
+  // Buscar propuesta pendiente
+  let proposerNum = null;
+  for (const pn of Object.keys(data[chatId].propuestas[senderID] || {})) {
+    if (data[chatId].propuestas[senderID][pn].mensajeId === quotedKey) {
+      proposerNum = pn;
+      break;
+    }
+  }
   if (!proposerNum) return;
 
   if (replyText === "sí" || replyText === "si") {
@@ -134,8 +160,13 @@ handler.onReply = async (msg, { conn }) => {
     delete data[chatId].propuestas[senderID][proposerNum];
     fs.writeFileSync(MARRY_PATH, JSON.stringify(data, null, 2));
 
+    // Mensaje bonito de boda
+    const texto = textosAceptado[Math.floor(Math.random() * textosAceptado.length)]
+      .replace("@1", `@${proposerNum}`)
+      .replace("@2", `@${senderNum}`);
+
     await conn.sendMessage(chatId, {
-      text: `🎊 ¡Felicidades @${proposerNum} y @${senderNum}, ahora están casados! 🥰💍`,
+      text: texto,
       mentions: [`${proposerNum}@s.whatsapp.net`, senderID]
     }, { quoted: msg });
   } else if (replyText === "no") {
@@ -143,12 +174,25 @@ handler.onReply = async (msg, { conn }) => {
     delete data[chatId].propuestas[senderID][proposerNum];
     fs.writeFileSync(MARRY_PATH, JSON.stringify(data, null, 2));
 
+    // Mensaje bonito de rechazo
+    const texto = textosRechazo[Math.floor(Math.random() * textosRechazo.length)]
+      .replace("@1", `@${proposerNum}`)
+      .replace("@2", `@${senderNum}`);
+
     await conn.sendMessage(chatId, {
-      text: `💔 @${senderNum} rechazó la propuesta de matrimonio de @${proposerNum}.`,
+      text: texto,
       mentions: [`${proposerNum}@s.whatsapp.net`, senderID]
     }, { quoted: msg });
   }
 };
 
+// Necesitas llamar a onReplyMarriage cuando un mensaje sea respuesta a otro
+// Por ejemplo, en tu manejador principal de mensajes:
+// if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
+//   onReplyMarriage(msg, { conn });
+// }
+
 handler.command = ["marry", "casarse", "matrimonio"];
+handler.onReplyMarriage = onReplyMarriage;
+
 module.exports = handler;
