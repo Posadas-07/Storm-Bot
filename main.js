@@ -3354,9 +3354,11 @@ case 'allmenu': {
     try {
         const fs = require("fs");
 
-        // Verificar si el remitente es Owner
-        const senderNum = msg.key.participant || msg.key.remoteJid;
-        const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+        // Verificar si el remitente es Owner (corregido)
+        const sender = msg.key.participant || msg.key.remoteJid;
+        const senderNum = sender.replace(/[^0-9]/g, '');
+        const isOwner = global.owner.some(([id]) => id === senderNum || id === senderNum + '@s.whatsapp.net');
+
         if (!isOwner) {
             await sock.sendMessage(msg.key.remoteJid, { text: "❌ *Este comando solo puede usarlo el Owner.*" }, { quoted: msg });
             return;
@@ -3432,11 +3434,14 @@ case 'allmenu': {
         );
     }
     break;
-}    
+}
+
 case 'menuowner': {
   try {
-    const senderNum = msg.key.participant || msg.key.remoteJid;
-    const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    const sender = msg.key.participant || msg.key.remoteJid;
+    const senderNum = sender.replace(/[^0-9]/g, '');
+    const isOwner = global.owner.some(([id]) => id === senderNum || id === senderNum + '@s.whatsapp.net');
+
     if (!isOwner) {
       await sock.sendMessage(msg.key.remoteJid, {
         text: "❌ *Este comando solo puede usarlo el Owner.*"
@@ -3512,8 +3517,10 @@ case 'menuowner': {
 }
 case 'menurpg': {
   try {
-    const senderNum = msg.key.participant || msg.key.remoteJid;
-    const isOwner = global.owner.some(([id]) => id === senderNum.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    const sender = msg.key.participant || msg.key.remoteJid;
+    const senderNum = sender.replace(/[^0-9]/g, '');
+    const isOwner = global.owner.some(([id]) => id === senderNum || id === senderNum + '@s.whatsapp.net');
+
     if (!isOwner) {
       await sock.sendMessage(msg.key.remoteJid, {
         text: "❌ *Este comando solo puede usarlo el Owner.*"
@@ -3608,7 +3615,8 @@ Así te registras
     );
   }
   break;
-}
+}  
+
         
 case 'menu': {
   try {
