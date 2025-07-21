@@ -2,10 +2,9 @@ const fs = require("fs");
 const path = require("path");
 
 const gifUrls = [
-  "https://cdn.russellxz.click/5b056a4b.mp4",
-  "https://cdn.russellxz.click/5c5a4f5c.mp4",
-  "https://cdn.russellxz.click/f70fb41b.mp4",
-  "https://cdn.russellxz.click/45e2ec30.mp4"
+  "https://cdn.russellxz.click/900d0c09.mp4",
+  "https://cdn.russellxz.click/087c498d.mp4",
+  "https://cdn.russellxz.click/ed4f584d.mp4"
 ];
 
 const textos = [
