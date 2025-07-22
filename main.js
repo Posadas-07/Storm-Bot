@@ -3797,9 +3797,22 @@ case 'menu': {
 ⎔ ${global.prefix}cachudo
 ⎔ ${global.prefix}adopdata
 ⎔ ${global.prefix}adoptado
+⎔ ${global.prefix}nalguear 
 ⎔ ${global.prefix}rata
 ⎔ ${global.prefix}verdad 
 ⎔ ${global.prefix}rex
+⎔ ${global.prefix}golpear
+⎔ ${global.prefix}querollo
+⎔ ${global.prefix}ns
+⎔ ${global.prefix}universo
+⎔ ${global.prefix}vegito
+⎔ ${global.prefix}calidad
+⎔ ${global.prefix}sarco
+⎔ ${global.prefix}tsi
+⎔ ${global.prefix}goats
+⎔ ${global.prefix}top1
+⎔ ${global.prefix}top2
+⎔ ${global.prefix}matartnx
 ⎔ ${global.prefix}golpear
 ⎔ ${global.prefix}spino
 ⎔ ${global.prefix}alpha
@@ -3807,12 +3820,11 @@ case 'menu': {
 ⎔ ${global.prefix}abrazar 
 ⎔ ${global.prefix}matar
 ⎔ ${global.prefix}hackear 
-⎔ ${global.prefix} asustar 
+⎔ ${global.prefix}asustar 
 ⎔ ${global.prefix}reto  
 ⎔ ${global.prefix}personalidad  
 ⎔ ${global.prefix}ship  
 ⎔ ${global.prefix}parejas  
-⎔ ${global.prefix}menurpg
 
 ╭──────────────╮  
 │ ✦ COMANDO +18 ✦ │  
@@ -3903,7 +3915,10 @@ case 'menugrupo': {
 ├✦ ${global.prefix}fankick
 ├✦ ${global.prefix}okfan
 ├✦ ${global.prefix}delete
-├✦ ${global.prefix}damelink  
+├✦ ${global.prefix}damelink
+├✦ ${global.prefix}advertencia 
+├✦ ${global.prefix}quitaradvertencia 
+├✦ ${global.prefix}advertenciasgrupo 
 ├✦ ${global.prefix}mute
 ├✦ ${global.prefix}unmute
 ├✦ ${global.prefix}ban
