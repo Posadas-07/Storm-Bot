@@ -42,10 +42,10 @@ const handler = async (msg, { conn }) => {
 
   const mutePath = path.resolve("./mute.json");
   const muteData = fs.existsSync(mutePath) ? JSON.parse(fs.readFileSync(mutePath)) : {};
-  if (!muteData[chatId]) muteData[chatId] = [];
+  if (!muteData[chatId]) muteData[chatId] = {};
 
-  if (!muteData[chatId].includes(target)) {
-    muteData[chatId].push(target);
+  if (!muteData[chatId][target]) {
+    muteData[chatId][target] = senderId; // Guardar quién muteó a quién
     fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
     await conn.sendMessage(chatId, {
       text: `🔇 Usuario @${target.split("@")[0]} ha sido muteado.`,
