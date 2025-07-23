@@ -33,11 +33,20 @@ const handler = async (msg, { conn }) => {
 
   const mutePath = path.resolve("./mute.json");
   const muteData = fs.existsSync(mutePath) ? JSON.parse(fs.readFileSync(mutePath)) : {};
-  if (!muteData[chatId]) muteData[chatId] = [];
+  if (!muteData[chatId]) muteData[chatId] = {};
 
-  if (muteData[chatId].includes(target)) {
-    muteData[chatId] = muteData[chatId].filter(u => u !== target);
+  const mutedBy = muteData[chatId][target];
+
+  if (mutedBy) {
+    if (mutedBy !== senderId && !isOwner) {
+      return conn.sendMessage(chatId, {
+        text: "❌ Solo la persona que muteó a este usuario puede desmutearlo."
+      }, { quoted: msg });
+    }
+
+    delete muteData[chatId][target];
     fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+
     await conn.sendMessage(chatId, {
       text: `🔊 Usuario @${target.split("@")[0]} ha sido desmuteado.`,
       mentions: [target]
