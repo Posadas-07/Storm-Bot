@@ -10,7 +10,7 @@ const handler = async (msg, { conn }) => {
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "❌ Este comando solo puede usarse en grupos."
+      text: "📛 *Este comando solo puede usarse en grupos.*"
     }, { quoted: msg });
   }
 
@@ -18,16 +18,27 @@ const handler = async (msg, { conn }) => {
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
   if (!isAdmin && !isOwner) {
     return conn.sendMessage(chatId, {
-      text: "❌ Solo *admins* o *dueños* del bot pueden usar este comando."
+      text: "🚫 *Acceso denegado*\nSolo los *admins* o *dueños* del bot pueden usar este comando."
     }, { quoted: msg });
   }
 
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const target = context?.participant;
+  const mentionedJid = context?.mentionedJid || [];
+
+  let target = null;
+
+  // Opción 1: responder a mensaje
+  if (context?.participant) {
+    target = context.participant;
+  }
+  // Opción 2: mencionar con @
+  else if (mentionedJid.length > 0) {
+    target = mentionedJid[0];
+  }
 
   if (!target) {
     return conn.sendMessage(chatId, {
-      text: "⚠️ Responde al mensaje del usuario que quieres mutear."
+      text: "📍 *Debes responder al mensaje o mencionar con @ al usuario que deseas mutear.*"
     }, { quoted: msg });
   }
 
@@ -36,7 +47,7 @@ const handler = async (msg, { conn }) => {
 
   if (isTargetOwner) {
     return conn.sendMessage(chatId, {
-      text: "❌ No puedes mutear al *dueño del bot*."
+      text: "⚠️𝘈𝘤𝘤𝘪𝘰́𝘯 𝘥𝘦𝘯𝘦𝘨𝘢𝘥𝘢 𝘯𝘰 𝘱𝘶𝘦𝘥𝘦𝘴 𝘮𝘶𝘵𝘦𝘢𝘳 𝘢𝘭 𝘥𝘶𝘦𝘯̃𝘰 𝘥𝘦𝘭 𝘣𝘰𝘵."
     }, { quoted: msg });
   }
 
@@ -47,13 +58,27 @@ const handler = async (msg, { conn }) => {
   if (!muteData[chatId].includes(target)) {
     muteData[chatId].push(target);
     fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+
     await conn.sendMessage(chatId, {
-      text: `🔇 Usuario @${target.split("@")[0]} ha sido muteado.`,
+      text:
+`🔇 *El usuario ha sido silenciado en el grupo.*
+
+╭─⬣「 *Usuario Silenciado* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ 🚫 Estado: Muteado
+╰─⬣`,
       mentions: [target]
     }, { quoted: msg });
+
   } else {
     await conn.sendMessage(chatId, {
-      text: "⚠️ Este usuario ya está muteado.",
+      text:
+`⚠️ *Este usuario ya está silenciado.*
+
+╭─⬣「 *Ya Silenciado* 」⬣
+│ 👤 Usuario: @${target.split("@")[0]}
+│ 🔇 Estado: Muteado
+╰─⬣`,
       mentions: [target]
     }, { quoted: msg });
   }
