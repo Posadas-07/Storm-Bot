@@ -35,4 +35,4 @@ handler.command = ['mute'];
 handler.group = true;
 handler.admin = true;
 
-export default handler;
+module export handler;
