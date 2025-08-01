@@ -6,73 +6,78 @@ const handler = async (msg, { conn }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const isOwner = global.owner.some(([id]) => id === senderNum);
+  const fromMe = msg.key.fromMe;
+  const isOwner = global.isOwner(senderId);
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "📛 *Este comando solo puede usarse en grupos.*"
+      text: "❌ *Este comando solo puede usarse en grupos.*"
     }, { quoted: msg });
   }
 
   const metadata = await conn.groupMetadata(chatId);
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-  if (!isAdmin && !isOwner) {
+
+  if (!isAdmin && !isOwner && !fromMe) {
     return conn.sendMessage(chatId, {
-      text: "🚫 *Acceso denegado*\nSolo los *admins* o *dueños* del bot pueden usar este comando."
+      text: "⛔ *Solo administradores o dueños del bot pueden usar este comando.*"
     }, { quoted: msg });
   }
 
+  // 🧠 Detectar usuarios a desmutear
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const mentionedJid = context?.mentionedJid || [];
+  const mentionedJids = context?.mentionedJid || [];
+  const targetReply = context?.participant;
 
-  let target = null;
+  const targets = new Set();
 
-  // Opción 1: respuesta a mensaje
-  if (context?.participant) {
-    target = context.participant;
-  }
-  // Opción 2: mención con @usuario
-  else if (mentionedJid.length > 0) {
-    target = mentionedJid[0];
-  }
+  if (targetReply) targets.add(targetReply);
+  if (mentionedJids.length) mentionedJids.forEach(j => targets.add(j));
 
-  if (!target) {
+  if (!targets.size) {
     return conn.sendMessage(chatId, {
-      text: "📍 *Debes responder al mensaje o mencionar con @ al usuario que deseas desmutear.*"
+      text: "⚠️ *Responde o menciona a uno o más usuarios para desmutear.*"
     }, { quoted: msg });
   }
 
-  const mutePath = path.resolve("./mute.json");
-  const muteData = fs.existsSync(mutePath) ? JSON.parse(fs.readFileSync(mutePath)) : {};
-  if (!muteData[chatId]) muteData[chatId] = [];
+  const welcomePath = path.resolve("setwelcome.json");
+  const welcomeData = fs.existsSync(welcomePath)
+    ? JSON.parse(fs.readFileSync(welcomePath, "utf-8"))
+    : {};
 
-  if (muteData[chatId].includes(target)) {
-    muteData[chatId] = muteData[chatId].filter(u => u !== target);
-    fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+  welcomeData[chatId] = welcomeData[chatId] || {};
+  welcomeData[chatId].muted = welcomeData[chatId].muted || [];
 
-    await conn.sendMessage(chatId, {
-      text:
-`🔊 *El usuario ha sido desmuteado correctamente.*
+  const desmuteados = [];
+  const noMuteados = [];
 
-╭─⬣「 *Usuario Desmuteado* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ 🔓 Estado: Desmuteado
-╰─⬣`,
-      mentions: [target]
-    }, { quoted: msg });
+  for (const jid of targets) {
+    const num = jid.replace(/[^0-9]/g, "");
 
-  } else {
-    await conn.sendMessage(chatId, {
-      text:
-`⚠️ *Este usuario no estaba muteado.*
-
-╭─⬣「 *Sin Silencio* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ 🔈 Estado: No muteado
-╰─⬣`,
-      mentions: [target]
-    }, { quoted: msg });
+    if (welcomeData[chatId].muted.includes(jid)) {
+      welcomeData[chatId].muted = welcomeData[chatId].muted.filter(u => u !== jid);
+      desmuteados.push(`@${num}`);
+    } else {
+      noMuteados.push(`@${num}`);
+    }
   }
+
+  fs.writeFileSync(welcomePath, JSON.stringify(welcomeData, null, 2));
+
+  let texto = "";
+
+  if (desmuteados.length > 0) {
+    texto += `🔊 *Usuarios desmuteados correctamente:*\n${desmuteados.map((u, i) => `${i + 1}. ${u}`).join("\n")}\n\n`;
+  }
+
+  if (noMuteados.length > 0) {
+    texto += `ℹ️ *Estos usuarios no estaban muteados:*\n${noMuteados.map((u, i) => `${i + 1}. ${u}`).join("\n")}`;
+  }
+
+  await conn.sendMessage(chatId, {
+    text: texto.trim(),
+    mentions: [...desmuteados, ...noMuteados].map(u => u.replace("@", "") + "@s.whatsapp.net")
+  }, { quoted: msg });
 };
 
 handler.command = ["unmute"];
