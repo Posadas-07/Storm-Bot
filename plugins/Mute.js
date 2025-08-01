@@ -6,82 +6,82 @@ const handler = async (msg, { conn }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const isOwner = global.owner.some(([id]) => id === senderNum);
+  const fromMe = msg.key.fromMe;
+  const isOwner = global.isOwner(senderId);
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "📛 *Este comando solo puede usarse en grupos.*"
+      text: "❌ *Este comando solo puede usarse en grupos.*"
     }, { quoted: msg });
   }
 
   const metadata = await conn.groupMetadata(chatId);
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-  if (!isAdmin && !isOwner) {
+
+  if (!isAdmin && !isOwner && !fromMe) {
     return conn.sendMessage(chatId, {
-      text: "🚫 *Acceso denegado*\nSolo los *admins* o *dueños* del bot pueden usar este comando."
+      text: "⛔ *Solo administradores o dueños del bot pueden usar este comando.*"
     }, { quoted: msg });
   }
 
+  // 🧠 Detectar usuarios a mutear por respuesta o menciones
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const mentionedJid = context?.mentionedJid || [];
+  const mentionedJids = context?.mentionedJid || [];
+  const targetReply = context?.participant;
 
-  let target = null;
+  const targets = new Set();
 
-  // Opción 1: responder a mensaje
-  if (context?.participant) {
-    target = context.participant;
-  }
-  // Opción 2: mencionar con @
-  else if (mentionedJid.length > 0) {
-    target = mentionedJid[0];
-  }
+  if (targetReply) targets.add(targetReply);
+  if (mentionedJids.length) mentionedJids.forEach(j => targets.add(j));
 
-  if (!target) {
+  if (!targets.size) {
     return conn.sendMessage(chatId, {
-      text: "📍 *Debes responder al mensaje o mencionar con @ al usuario que deseas mutear.*"
+      text: "⚠️ *Responde o menciona a uno o más usuarios para mutear.*"
     }, { quoted: msg });
   }
 
-  const targetNum = target.replace(/[^0-9]/g, "");
-  const isTargetOwner = global.owner.some(([id]) => id === targetNum);
+  const welcomePath = path.resolve("setwelcome.json");
+  const welcomeData = fs.existsSync(welcomePath)
+    ? JSON.parse(fs.readFileSync(welcomePath, "utf-8"))
+    : {};
 
-  if (isTargetOwner) {
-    return conn.sendMessage(chatId, {
-      text: "⚠️ *No puedes mutear al dueño del bot.*"
-    }, { quoted: msg });
+  welcomeData[chatId] = welcomeData[chatId] || {};
+  welcomeData[chatId].muted = welcomeData[chatId].muted || [];
+
+  const yaMuteados = [];
+  const muteadosNuevos = [];
+
+  for (const jid of targets) {
+    const num = jid.replace(/[^0-9]/g, "");
+
+    if (global.isOwner(jid)) {
+      continue; // no mutear owner
+    }
+
+    if (!welcomeData[chatId].muted.includes(jid)) {
+      welcomeData[chatId].muted.push(jid);
+      muteadosNuevos.push(`@${num}`);
+    } else {
+      yaMuteados.push(`@${num}`);
+    }
   }
 
-  const mutePath = path.resolve("./mute.json");
-  const muteData = fs.existsSync(mutePath) ? JSON.parse(fs.readFileSync(mutePath)) : {};
-  if (!muteData[chatId]) muteData[chatId] = {};
+  fs.writeFileSync(welcomePath, JSON.stringify(welcomeData, null, 2));
 
-  if (!muteData[chatId][target]) {
-    muteData[chatId][target] = true;
-    fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+  let texto = "";
 
-    await conn.sendMessage(chatId, {
-      text:
-`🔇 *El usuario ha sido silenciado en el grupo.*
-
-╭─⬣「 *Usuario Silenciado* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ 🚫 Estado: Muteado
-╰─⬣`,
-      mentions: [target]
-    }, { quoted: msg });
-
-  } else {
-    await conn.sendMessage(chatId, {
-      text:
-`⚠️ *Este usuario ya está silenciado.*
-
-╭─⬣「 *Ya Silenciado* 」⬣
-│ 👤 Usuario: @${target.split("@")[0]}
-│ 🔇 Estado: Muteado
-╰─⬣`,
-      mentions: [target]
-    }, { quoted: msg });
+  if (muteadosNuevos.length > 0) {
+    texto += `🔇 *Usuarios muteados correctamente:*\n${muteadosNuevos.map((u, i) => `${i + 1}. ${u}`).join("\n")}\n\n`;
   }
+
+  if (yaMuteados.length > 0) {
+    texto += `⚠️ *Ya estaban muteados:*\n${yaMuteados.map((u, i) => `${i + 1}. ${u}`).join("\n")}`;
+  }
+
+  await conn.sendMessage(chatId, {
+    text: texto.trim(),
+    mentions: [...muteadosNuevos, ...yaMuteados].map(u => u.replace("@", "") + "@s.whatsapp.net")
+  }, { quoted: msg });
 };
 
 handler.command = ["mute"];
