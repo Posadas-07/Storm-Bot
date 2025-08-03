@@ -6,82 +6,57 @@ const handler = async (msg, { conn }) => {
   const senderId = msg.key.participant || msg.key.remoteJid;
   const senderNum = senderId.replace(/[^0-9]/g, "");
   const isGroup = chatId.endsWith("@g.us");
-  const fromMe = msg.key.fromMe;
-  const isOwner = global.isOwner(senderId);
+  const isOwner = global.owner.some(([id]) => id === senderNum);
 
   if (!isGroup) {
     return conn.sendMessage(chatId, {
-      text: "❌ *Este comando solo puede usarse en grupos.*"
+      text: "❌ Este comando solo puede usarse en grupos."
     }, { quoted: msg });
   }
 
   const metadata = await conn.groupMetadata(chatId);
   const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-
-  if (!isAdmin && !isOwner && !fromMe) {
+  if (!isAdmin && !isOwner) {
     return conn.sendMessage(chatId, {
-      text: "⛔ *Solo administradores o dueños del bot pueden usar este comando.*"
+      text: "❌ Solo *admins* o *dueños* del bot pueden usar este comando."
     }, { quoted: msg });
   }
 
-  // 🧠 Detectar usuarios a mutear por respuesta o menciones
   const context = msg.message?.extendedTextMessage?.contextInfo;
-  const mentionedJids = context?.mentionedJid || [];
-  const targetReply = context?.participant;
+  const target = context?.participant;
 
-  const targets = new Set();
-
-  if (targetReply) targets.add(targetReply);
-  if (mentionedJids.length) mentionedJids.forEach(j => targets.add(j));
-
-  if (!targets.size) {
+  if (!target) {
     return conn.sendMessage(chatId, {
-      text: "⚠️ *Responde o menciona a uno o más usuarios para mutear.*"
+      text: "⚠️ Responde al mensaje del usuario que quieres mutear."
     }, { quoted: msg });
   }
 
-  const welcomePath = path.resolve("setwelcome.json");
-  const welcomeData = fs.existsSync(welcomePath)
-    ? JSON.parse(fs.readFileSync(welcomePath, "utf-8"))
-    : {};
+  const targetNum = target.replace(/[^0-9]/g, "");
+  const isTargetOwner = global.owner.some(([id]) => id === targetNum);
 
-  welcomeData[chatId] = welcomeData[chatId] || {};
-  welcomeData[chatId].muted = welcomeData[chatId].muted || [];
-
-  const yaMuteados = [];
-  const muteadosNuevos = [];
-
-  for (const jid of targets) {
-    const num = jid.replace(/[^0-9]/g, "");
-
-    if (global.isOwner(jid)) {
-      continue; // no mutear owner
-    }
-
-    if (!welcomeData[chatId].muted.includes(jid)) {
-      welcomeData[chatId].muted.push(jid);
-      muteadosNuevos.push(`@${num}`);
-    } else {
-      yaMuteados.push(`@${num}`);
-    }
+  if (isTargetOwner) {
+    return conn.sendMessage(chatId, {
+      text: "❌ No puedes mutear al *dueño del bot*."
+    }, { quoted: msg });
   }
 
-  fs.writeFileSync(welcomePath, JSON.stringify(welcomeData, null, 2));
+  const mutePath = path.resolve("./mute.json");
+  const muteData = fs.existsSync(mutePath) ? JSON.parse(fs.readFileSync(mutePath)) : {};
+  if (!muteData[chatId]) muteData[chatId] = [];
 
-  let texto = "";
-
-  if (muteadosNuevos.length > 0) {
-    texto += `🔇 *Usuarios muteados correctamente:*\n${muteadosNuevos.map((u, i) => `${i + 1}. ${u}`).join("\n")}\n\n`;
+  if (!muteData[chatId].includes(target)) {
+    muteData[chatId].push(target);
+    fs.writeFileSync(mutePath, JSON.stringify(muteData, null, 2));
+    await conn.sendMessage(chatId, {
+      text: `🔇 Usuario @${target.split("@")[0]} ha sido muteado.`,
+      mentions: [target]
+    }, { quoted: msg });
+  } else {
+    await conn.sendMessage(chatId, {
+      text: "⚠️ Este usuario ya está muteado.",
+      mentions: [target]
+    }, { quoted: msg });
   }
-
-  if (yaMuteados.length > 0) {
-    texto += `⚠️ *Ya estaban muteados:*\n${yaMuteados.map((u, i) => `${i + 1}. ${u}`).join("\n")}`;
-  }
-
-  await conn.sendMessage(chatId, {
-    text: texto.trim(),
-    mentions: [...muteadosNuevos, ...yaMuteados].map(u => u.replace("@", "") + "@s.whatsapp.net")
-  }, { quoted: msg });
 };
 
 handler.command = ["mute"];
