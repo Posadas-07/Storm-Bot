@@ -1036,70 +1036,68 @@ try {
     
 // === INICIO BLOQUEO DE MENSAJES DE USUARIOS MUTEADOS ===
 try {
-  const fs = require("fs");
-  const path = require("path");
-
-  const chatId = m.key.remoteJid;
-  const senderId = m.key.participant || m.key.remoteJid;
-  const senderNum = senderId.replace(/[^0-9]/g, "");
+  const chatId = msg.key.remoteJid;
   const isGroup = chatId.endsWith("@g.us");
-  const isBot = senderId === sock.user.id;
-  const isOwner = global.isOwner ? global.isOwner(senderId) : false;
 
-  if (!isGroup || isOwner || isBot || !m.message) return;
+  if (isGroup) {
+    const senderId = msg.key.participant || msg.key.remoteJid;
+    const mutePath = "./mute.json";
+    const muteData = fs.existsSync(mutePath) ? JSON.parse(fs.readFileSync(mutePath)) : {};
+    const muteList = muteData[chatId] || [];
 
-  const welcomePath = path.resolve("setwelcome.json");
-  const welcomeData = fs.existsSync(welcomePath)
-    ? JSON.parse(fs.readFileSync(welcomePath, "utf-8"))
-    : {};
+    if (muteList.includes(senderId)) {
+      global._muteCounter = global._muteCounter || {};
+      const key = `${chatId}:${senderId}`;
+      global._muteCounter[key] = (global._muteCounter[key] || 0) + 1;
 
-  const mutedList = welcomeData[chatId]?.muted || [];
+      const count = global._muteCounter[key];
 
-  if (!mutedList.includes(senderId)) return;
-
-  global._muteCounter = global._muteCounter || {};
-  const key = `${chatId}:${senderId}`;
-  global._muteCounter[key] = (global._muteCounter[key] || 0) + 1;
-  const count = global._muteCounter[key];
-
-  if (count === 8) {
-    await sock.sendMessage(chatId, {
-      text: `⚠️ @${senderNum}, estás *muteado*. Si sigues enviando mensajes podrías ser eliminado.`,
-      mentions: [senderId]
-    });
-  }
-
-  if (count === 13) {
-    await sock.sendMessage(chatId, {
-      text: `⛔ @${senderNum}, estás al *límite*. Un mensaje más y serás eliminado.`,
-      mentions: [senderId]
-    });
-  }
-
-  const metadata = await sock.groupMetadata(chatId);
-  const botId = sock.user.id.split(":")[0] + "@s.whatsapp.net";
-  const botIsAdmin = metadata.participants.find(p => p.id === botId)?.admin;
-  const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-
-  if (count >= 15 && botIsAdmin && !isAdmin) {
-    await sock.groupParticipantsUpdate(chatId, [senderId], "remove");
-    await sock.sendMessage(chatId, {
-      text: `❌ @${senderNum} fue eliminado por ignorar el mute.`,
-      mentions: [senderId]
-    });
-    delete global._muteCounter[key];
-    return;
-  }
-
-  if (botIsAdmin) {
-    await sock.sendMessage2(chatId, {
-      delete: {
-        remoteJid: chatId,
-        fromMe: false,
-        id: m.key.id,
-        participant: m.key.participant || senderId
+      if (count === 8) {
+        await sock.sendMessage(chatId, {
+          text: `⚠️ @${senderId.split("@")[0]} 𝖥𝗎𝗂𝗌𝗍𝖾 𝗆𝗎𝗍𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖼𝖺𝗇𝗌𝗈𝗇.\n𝖲𝗂 𝗌𝗂𝗀𝗎𝖾𝗌 𝖾𝗇𝗏𝗂𝖺𝗇𝖽𝗈 𝗆𝖾𝗇𝗌𝖺𝗃𝖾𝗌 𝗉𝗈𝖽𝗋𝗂́𝖺𝗌 𝗌𝖾𝗋 𝖾𝗅𝗂𝗆𝗂𝗇𝖺𝖽𝗈 𝖼𝗈𝗇 𝖾𝗅 𝗉𝗈𝖽𝖾𝗋 𝖽𝖾 𝖪𝗂𝗅𝗅𝗎𝖺𝖻𝗈𝗍`,
+          mentions: [senderId]
+        });
       }
-    });
+
+      if (count === 13) {
+        await sock.sendMessage(chatId, {
+          text: `⚠️ @${senderId.split("@")[0]} 𝖤𝗌𝗍𝖺𝗌 𝖺 𝗎𝗇 𝗉𝖺𝗌𝗈 𝖽𝖾 𝗂𝗋 𝖺𝗅 𝗈𝗍𝗋𝗈 𝗆𝗎𝗇𝖽𝗈 .\n𝖲𝗂 𝖾𝗇𝗏𝗂́𝖺𝗌 *𝗈𝗍𝗋𝗈 𝗆𝖾𝗇𝗌𝖺𝗃𝖾*, 𝗌𝖾𝗋𝖺́𝗌 𝖾𝗅𝗂𝗆𝗂𝗇𝖺𝖽𝗈 𝖽𝖾𝗅 𝗀𝗋𝗎𝗉𝗈.`,
+          mentions: [senderId]
+        });
+      }
+
+      if (count >= 15) {
+        const metadata = await sock.groupMetadata(chatId);
+        const user = metadata.participants.find(p => p.id === senderId);
+        const isAdmin = user?.admin === 'admin' || user?.admin === 'superadmin';
+
+        if (!isAdmin) {
+          await sock.groupParticipantsUpdate(chatId, [senderId], "remove");
+          await sock.sendMessage(chatId, {
+            text: `❌ @${senderId.split("@")[0]} fue eliminado por ignorar el mute.`,
+            mentions: [senderId]
+          });
+          delete global._muteCounter[key];
+        } else {
+          await sock.sendMessage(chatId, {
+            text: `🔇 @${senderId.split("@")[0]} es administrador y no se puede eliminar.`,
+            mentions: [senderId]
+          });
+        }
+      }
+
+      // eliminar mensaje
+      await sock.sendMessage(chatId, {
+        delete: {
+          remoteJid: chatId,
+          fromMe: false,
+          id: msg.key.id,
+          participant: senderId
+        }
+      });
+
+      return; // este return es interno, no afecta el resto
+    }
   }
 } catch (err) {
   console.error("❌ Error en lógica de muteo:", err);
