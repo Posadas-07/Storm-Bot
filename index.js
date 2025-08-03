@@ -1047,71 +1047,89 @@ let handler = async (m, { sock }) => {
     const isBot = senderId === sock.user.id;
     const isOwner = global.isOwner(senderId);
 
-    if (isGroup && !isOwner) {
-      const welcomePath = path.resolve("setwelcome.json");
-      const welcomeData = fs.existsSync(welcomePath)
-        ? JSON.parse(fs.readFileSync(welcomePath, "utf-8"))
-        : {};
+    if (!isGroup || isOwner || isBot) return;
 
-      const mutedList = welcomeData[chatId]?.muted || [];
+    // Leer la lista de muteados
+    const welcomePath = path.resolve("setwelcome.json");
+    const welcomeData = fs.existsSync(welcomePath)
+      ? JSON.parse(fs.readFileSync(welcomePath, "utf-8"))
+      : {};
 
-      if (mutedList.includes(senderId)) {
-        global._muteCounter = global._muteCounter || {};
-        const key = `${chatId}:${senderId}`;
-        global._muteCounter[key] = (global._muteCounter[key] || 0) + 1;
+    const mutedList = welcomeData[chatId]?.muted || [];
 
-        const count = global._muteCounter[key];
+    if (!mutedList.includes(senderId)) return;
 
-        if (count === 8) {
+    // Sistema de conteo de mensajes
+    global._muteCounter = global._muteCounter || {};
+    const key = `${chatId}:${senderId}`;
+    global._muteCounter[key] = (global._muteCounter[key] || 0) + 1;
+    const count = global._muteCounter[key];
+
+    // Mensajes de advertencia
+    if (count === 8) {
+      await sock.sendMessage(chatId, {
+        text: `⚠️ @${senderNum}, estás *muteado*. Si sigues enviando mensajes podrías ser eliminado.`,
+        mentions: [senderId]
+      });
+    }
+
+    if (count === 13) {
+      await sock.sendMessage(chatId, {
+        text: `⛔ @${senderNum}, estás al *límite*. Un mensaje más y serás eliminado.`,
+        mentions: [senderId]
+      });
+    }
+
+    if (count >= 15) {
+      const metadata = await sock.groupMetadata(chatId);
+      const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
+      const botId = sock.user.id.split(":")[0] + "@s.whatsapp.net";
+      const botIsAdmin = metadata.participants.find(p => p.id === botId)?.admin;
+
+      if (botIsAdmin) {
+        if (!isAdmin) {
+          await sock.groupParticipantsUpdate(chatId, [senderId], "remove");
           await sock.sendMessage(chatId, {
-            text: `⚠️ @${senderNum}, estás *muteado*. Si sigues enviando mensajes podrías ser eliminado.`,
+            text: `❌ @${senderNum} fue eliminado por ignorar el mute.`,
+            mentions: [senderId]
+          });
+          delete global._muteCounter[key];
+        } else {
+          await sock.sendMessage(chatId, {
+            text: `🔇 @${senderNum} está muteado pero no puede ser eliminado por ser admin.`,
             mentions: [senderId]
           });
         }
-
-        if (count === 13) {
-          await sock.sendMessage(chatId, {
-            text: `⛔ @${senderNum}, estás al *límite*. Un mensaje más y serás eliminado.`,
-            mentions: [senderId]
-          });
-        }
-
-        if (count >= 15) {
-          const metadata = await sock.groupMetadata(chatId);
-          const isAdmin = metadata.participants.find(p => p.id === senderId)?.admin;
-
-          if (!isAdmin) {
-            await sock.groupParticipantsUpdate(chatId, [senderId], "remove");
-            await sock.sendMessage(chatId, {
-              text: `❌ @${senderNum} fue eliminado por ignorar el mute.`,
-              mentions: [senderId]
-            });
-            delete global._muteCounter[key];
-          } else {
-            await sock.sendMessage(chatId, {
-              text: `🔇 @${senderNum} está muteado pero no puede ser eliminado por ser admin.`,
-              mentions: [senderId]
-            });
-          }
-        }
-
-        // Intentar borrar el mensaje
+      } else {
         await sock.sendMessage(chatId, {
-          delete: {
-            remoteJid: chatId,
-            fromMe: m.key.fromMe,
-            id: m.key.id,
-            participant: senderId
-          }
+          text: `⚠️ No puedo eliminar a @${senderNum} porque *no soy admin*.`,
+          mentions: [senderId]
         });
-
-        return;
       }
     }
+
+    // Intentar eliminar el mensaje si el bot es admin
+    const metadata = await sock.groupMetadata(chatId);
+    const botId = sock.user.id.split(":")[0] + "@s.whatsapp.net";
+    const botIsAdmin = metadata.participants.find(p => p.id === botId)?.admin;
+
+    if (botIsAdmin) {
+      await sock.sendMessage2(chatId, {
+        delete: {
+          remoteJid: chatId,
+          fromMe: false,
+          id: m.key.id,
+          participant: m.key.participant || senderId
+        }
+      });
+    }
+
   } catch (err) {
     console.error("❌ Error en lógica de muteo:", err);
   }
 };
+
+module.exports = handler;
 // === FIN BLOQUEO DE MENSAJES DE USUARIOS MUTEADOS ===
 
 // === INICIO BLOQUEO DE COMANDOS A USUARIOS BANEADOS ===
