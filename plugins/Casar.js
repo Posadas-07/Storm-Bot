@@ -3,12 +3,17 @@ const path = require("path");
 
 let propuestasMatrimonio = {};
 
+// Lista de GIFs para cuando acepten
+const gifsAceptado = [
+  "https://cdn.russellxz.click/6e57e418.mp4",
+  "https://cdn.russellxz.click/ab3ac8c6.mp4",
+  "https://cdn.russellxz.click/5108a357.mp4",
+  "https://cdn.russellxz.click/1143f9aa.mp4"
+];
+
 let handler = async (msg, { conn, args }) => {
   const chatId = msg.key.remoteJid;
   const sender = msg.key.participant || msg.key.remoteJid;
-
-  // ❌ Eliminado: verificación de juegos
-  // Ya no depende de activos.json
 
   if (!chatId.endsWith("@g.us")) {
     return conn.sendMessage(chatId, { text: "❌ 𝖤𝗌𝗍𝖾 𝖼𝗈𝗆𝖺𝗇𝖽𝗈 𝗌𝗈𝗅𝗈 𝗉𝗎𝖾𝖽𝖾 𝗎𝗌𝖺𝗋𝗌𝖾 𝖾𝗇 𝗀𝗋𝗎𝗉𝗈𝗌." }, { quoted: msg });
@@ -82,6 +87,10 @@ let handler = async (msg, { conn, args }) => {
 
       fs.writeFileSync(ruta, JSON.stringify(matrimonios, null, 2));
 
+      // Seleccionar GIF aleatorio
+      const gifAleatorio = gifsAceptado[Math.floor(Math.random() * gifsAceptado.length)];
+
+      // Mensaje de aceptación
       await conn.sendMessage(propuesta.chat, {
         text: `
 💞 𝖲𝖨, 𝖠𝖢𝖤𝖯𝖳𝖮 💞
@@ -92,6 +101,14 @@ let handler = async (msg, { conn, args }) => {
 ┗━━━━━━━━━━━━━━━━━━━━┛`,
         mentions: [propuesta.de, propuesta.para]
       });
+
+      // Enviar GIF
+      await conn.sendMessage(propuesta.chat, {
+        video: { url: gifAleatorio },
+        gifPlayback: true,
+        caption: "💖 ¡Felicidades a los recién casados!"
+      }, { quoted: m });
+
     } else if (emoji === "👎") {
       await conn.sendMessage(propuesta.chat, {
         text: `
