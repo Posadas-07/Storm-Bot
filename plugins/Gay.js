@@ -17,7 +17,7 @@ const handler = async (msg, { conn }) => {
     'https://cdn.russellxz.click/afd908e6.webp'
   ];
 
-  const audioURL = 'https://cdn.russellxz.click/96beb11b.mp3';
+  const audioURL = 'https://cdn.russellxz.click/ec711c91.mp3';
 
   let mentionedJid;
   try {
