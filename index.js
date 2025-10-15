@@ -425,7 +425,7 @@ if (update.action === "add" && welcomeActivo) {
       mentions: [participant]
     });
 
-    const audioUrl = 'https://cdn.russellxz.click/960e6475.mp3';
+    const audioUrl = 'https://cdn.russellxz.click/95402f43.mp3';
     await sock.sendMessage(update.id, {
       audio: { url: audioUrl },
       mimetype: 'audio/mp4',
