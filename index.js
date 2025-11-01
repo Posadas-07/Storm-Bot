@@ -377,10 +377,8 @@ let customWelcomes = {};
 if (fs.existsSync(welcomePath)) {
   customWelcomes = JSON.parse(fs.readFileSync(welcomePath, "utf-8"));
 }
-// Textos integrados para bienvenida y despedida
-  "Hasta pronto, y gracias por haber compartido momentos inolvidables con 🪼 CORTANA 2.0 BOT 🪼 👋💖."
 
-// BIENVENIDA: solo cuando alguien entra
+// === BIENVENIDA ===
 if (update.action === "add" && welcomeActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
@@ -389,13 +387,13 @@ if (update.action === "add" && welcomeActivo) {
 
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    } catch {}
 
     let groupName = "";
     try {
       const metadata = await sock.groupMetadata(update.id);
       groupName = metadata.subject || "Grupo desconocido";
-    } catch (err) {
+    } catch {
       groupName = "Grupo desconocido";
     }
 
@@ -403,20 +401,33 @@ if (update.action === "add" && welcomeActivo) {
 
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
-        textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customMessage.replace(/@user/gi, mention)}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝`;
+        textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗
+╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customMessage.replace(/@user/gi, mention)}
+╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}
+╚═════════════╝`;
       } else {
-        textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n\n${customMessage}`;
+        textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗
+╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}
+╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}
+╚═════════════╝
+
+${customMessage}`;
       }
     } else {
       let groupDesc = "";
       try {
         const metadata = await sock.groupMetadata(update.id);
-        groupDesc = metadata.desc ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}` : "\n\n📜 *Este grupo no tiene descripción.*";
-      } catch (err) {
+        groupDesc = metadata.desc
+          ? `\n\n📜 *Descripción del grupo:*\n${metadata.desc}`
+          : "\n\n📜 *Este grupo no tiene descripción.*";
+      } catch {
         groupDesc = "\n\n📜 *No se pudo obtener la descripción del grupo.*";
       }
 
-      textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝` + groupDesc;
+      textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗
+╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}
+╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}
+╚═════════════╝${groupDesc}`;
     }
 
     await sock.sendMessage(update.id, {
@@ -425,71 +436,80 @@ if (update.action === "add" && welcomeActivo) {
       mentions: [participant]
     });
 
-    const audioUrl = 'https://cdn.russellxz.click/95402f43.mp3';
+    // === AUDIO BIENVENIDA (reparado) ===
+    const audioUrl = 'https://cdn.russellxz.click/95402f43.mp3'; // tu mp3 válido
     await sock.sendMessage(update.id, {
       audio: { url: audioUrl },
-      mimetype: 'audio/mp4',
-      ptt: true
+      mimetype: 'audio/mpeg', // ✅ correcto para mp3
+      ptt: true // lo manda como nota de voz
     });
   }
 }
 
-// DESPEDIDA
+// === DESPEDIDA ===
 if (update.action === "remove" && despedidasActivo) {
   for (const participant of update.participants) {
     const mention = `@${participant.split("@")[0]}`;
-
     let customBye = "";
     try {
       const data = fs.existsSync("./byemsgs.json")
         ? JSON.parse(fs.readFileSync("./byemsgs.json", "utf-8"))
         : {};
       customBye = data[update.id];
-    } catch (e) {}
+    } catch {}
 
     let profilePicUrl = "https://cdn.russellxz.click/d9d547b6.jpeg";
     try {
       profilePicUrl = await sock.profilePictureUrl(participant, "image");
-    } catch (err) {}
+    } catch {}
 
     let groupName = "";
     try {
       const metadata = await sock.groupMetadata(update.id);
       groupName = metadata.subject || "Grupo desconocido";
-    } catch (err) {
+    } catch {
       groupName = "Grupo desconocido";
     }
 
     let byeText = "";
-
     if (customBye) {
       if (/(@user)/gi.test(customBye)) {
-        byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customBye.replace(/@user/gi, mention)}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝`;
+        byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗
+╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${customBye.replace(/@user/gi, mention)}
+╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}
+╚═════════════╝`;
       } else {
-        byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n\n${customBye}`;
+        byeText = `╔═ 𝗛𝗔𝗦𝗧𝗔 𝗟𝗨𝗘𝗚𝗢═╗
+╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}
+╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}
+╚═════════════╝
+
+${customBye}`;
       }
     } else {
-      byeText = `╔═ 𝗦𝗘 𝗙𝗨𝗘 👋🏻═╗\n╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}\n╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}\n╚═════════════╝\n👋 *Ya era hora de irte*`;
+      byeText = `╔═ 𝗦𝗘 𝗙𝗨𝗘 👋🏻═╗
+╠ 🧑🏻‍💻𝗠𝗶𝗲𝗺𝗯𝗿𝗼: ${mention}
+╠ 👥𝗚𝗿𝘂𝗽𝗼: ${groupName}
+╚═════════════╝
+👋 *Ya era hora de irte*`;
     }
 
-    // Enviar imagen con caption
     await sock.sendMessage(update.id, {
       image: { url: profilePicUrl },
       caption: byeText,
       mentions: [participant]
     });
 
-    // Enviar nota de voz (audio tipo PTT)
-    const audioUrl = 'https://cdn.russellxz.click/b3062c90.mp3'; // <- cámbialo si tienes otro audio
+    // === AUDIO DESPEDIDA (reparado) ===
+    const audioUrl = 'https://cdn.russellxz.click/b3062c90.mp3';
     await sock.sendMessage(update.id, {
       audio: { url: audioUrl },
-      mimetype: 'audio/mp4',
-      ptt: true
+      mimetype: 'audio/mpeg', // ✅ correcto tipo
+      ptt: true // ✅ nota de voz funcional
     });
   }
 }
-    // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
-
+// **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
   } catch (error) {
     console.error("Error en el evento group-participants.update:", error);
   }
