@@ -367,6 +367,8 @@ sock.ev.on("group-participants.update", async (update) => {
     // **************** FIN LÓGICA ANTIARABE ****************
 
     // **************** LÓGICA BIENVENIDA/DESPEDIDA ****************
+
+// **************** LÓGICA BIENVENIDA/DESPEDIDA ****************
 const welcomeActivo = activos.welcome?.[update.id];
 const despedidasActivo = activos.despedidas?.[update.id];
 
@@ -398,7 +400,6 @@ if (update.action === "add" && welcomeActivo) {
     }
 
     let textoFinal = "";
-
     if (customMessage) {
       if (/(@user)/gi.test(customMessage)) {
         textoFinal = `╔═ 𝗕𝗜𝗘𝗡𝗩𝗘𝗡𝗜𝗗𝗢/𝗔═╗
@@ -430,18 +431,22 @@ ${customMessage}`;
 ╚═════════════╝${groupDesc}`;
     }
 
+    // Enviar imagen con texto
     await sock.sendMessage(update.id, {
       image: { url: profilePicUrl },
       caption: textoFinal,
       mentions: [participant]
     });
 
-    // === AUDIO BIENVENIDA (reparado) ===
+    // === AUDIO BIENVENIDA (reproducible como música)
     const audioUrl = 'https://cdn.russellxz.click/95402f43.mp3'; // tu mp3 válido
+    const audioBuffer = await (await fetch(audioUrl)).buffer();
+
     await sock.sendMessage(update.id, {
-      audio: { url: audioUrl },
-      mimetype: 'audio/mpeg', // ✅ correcto para mp3
-      ptt: true // lo manda como nota de voz
+      audio: audioBuffer,
+      mimetype: 'audio/mpeg', // ✅ correcto tipo mp3
+      fileName: 'bienvenida.mp3', // ✅ aparece como música
+      ptt: false // ❌ no nota de voz, ✅ música reproducible
     });
   }
 }
@@ -500,15 +505,19 @@ ${customBye}`;
       mentions: [participant]
     });
 
-    // === AUDIO DESPEDIDA (reparado) ===
-    const audioUrl = 'https://cdn.russellxz.click/b3062c90.mp3';
+    // === AUDIO DESPEDIDA (reproducible como música)
+    const byeAudioUrl = 'https://cdn.russellxz.click/b3062c90.mp3';
+    const byeBuffer = await (await fetch(byeAudioUrl)).buffer();
+
     await sock.sendMessage(update.id, {
-      audio: { url: audioUrl },
-      mimetype: 'audio/mpeg', // ✅ correcto tipo
-      ptt: true // ✅ nota de voz funcional
+      audio: byeBuffer,
+      mimetype: 'audio/mpeg',
+      fileName: 'despedida.mp3',
+      ptt: false
     });
   }
 }
+// **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
 // **************** FIN LÓGICA BIENVENIDA/DESPEDIDA ****************
   } catch (error) {
     console.error("Error en el evento group-participants.update:", error);
